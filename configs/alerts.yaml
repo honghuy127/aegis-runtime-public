@@ -1,0 +1,53 @@
+# Alert/notification settings used by `main.py`.
+# Leave this file as simple key:value lines.
+
+# Master switch for all notifications.
+enabled: false
+
+# Comma-separated channels.
+# Available: telegram, email
+# Example: telegram,email
+enabled_channels: telegram
+
+# Alert policy for comparing current price to previous price:
+# - drop: alert only when price goes down
+# - rise: alert only when price goes up
+# - any:  alert on both directions (if threshold passes)
+alert_direction: drop
+# Minimum absolute change required (same currency unit as extracted price).
+# Example: 1000 means at least 1000 JPY/USD/EUR/etc change.
+min_absolute_change: 0
+# Minimum percent change required.
+# Example: 1.0 means at least 1% change.
+min_percent_change: 1.0
+# Target price threshold.
+# If > 0 and current_price <= target_price, alert can trigger immediately
+# (subject to cooldown).
+# Per-run override is available via:
+# - main.py --max-trip-price
+# - plan file max_trip_price
+target_price: 0
+# If true, alert on first successful observed price (no previous price needed).
+alert_on_first_observation: false
+# If true, alert when extraction returns no price.
+alert_on_missing_price: false
+# Cooldown window between alerts for the same service (minutes).
+cooldown_minutes: 0
+
+# Telegram credentials (read from environment variable names below).
+telegram_bot_token_env: TELEGRAM_BOT_TOKEN
+telegram_chat_id_env: TELEGRAM_CHAT_ID
+
+# Email transport settings.
+email_smtp_host: smtp.gmail.com
+email_smtp_port: 587
+email_starttls: true
+# Environment variable names for SMTP auth/from address.
+email_username_env: SMTP_USERNAME
+email_password_env: SMTP_PASSWORD
+email_from_env: SMTP_FROM
+# Comma-separated recipient list.
+# Example: user1@example.com,user2@example.com
+email_to:
+# Email subject prefix.
+email_subject_prefix: [FlightWatcher]

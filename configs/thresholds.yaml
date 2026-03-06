@@ -1,0 +1,327 @@
+# Runtime tuning knobs.
+# If unsure, keep defaults.
+#
+# Selector confidence gate for cache usage (0.0-1.0).
+# Higher value = trust only strong selectors.
+selector_min_confidence: 0.55
+
+# Confidence penalty when selector has soft drift.
+soft_drift_penalty: 0.08
+# Confidence penalty when selector has hard drift.
+hard_drift_penalty: 0.35
+# Confidence boost on successful selector extraction.
+selector_success_boost: 0.04
+# Confidence penalty on selector extraction failure.
+selector_failure_penalty: 0.15
+
+# Heuristic extraction price lower bound (used when LLM misses).
+heuristic_min_price: 500
+# Heuristic extraction price upper bound.
+heuristic_max_price: 5000000
+
+# Final plausibility cap for accepted prices.
+plausible_max_price: 10000000
+
+# Max retry attempts for scenario runner (plan generation/repair loop).
+scenario_max_retries: 4
+# Max planner turns per attempt (multi-turn website interaction loop).
+scenario_max_turns: 2
+# Hard timeout (seconds) for one service URL candidate run in main.py.
+# Prevents long teardown/hang from blocking all subsequent candidates.
+scenario_candidate_timeout_sec: 120
+# Upper cap for adaptive scenario timeout expansion in light mode.
+scenario_candidate_timeout_cap_sec: 3600
+# Soft-stop margin inside scenario runner before hard candidate timeout.
+# When remaining budget <= this margin, runner returns latest HTML instead of starting new retries.
+scenario_budget_soft_margin_sec: 12
+# Optional hard wall-clock watchdog for one scenario attempt (seconds).
+# 0 disables watchdog.
+scenario_wall_clock_cap_sec: 0
+# Per-step wall-clock cap to detect hangs in execute_plan (milliseconds).
+# Raises RuntimeError if any single step exceeds this duration.
+scenario_step_wall_clock_cap_ms: 45000
+# Per-action wall-clock caps (milliseconds). Used to bound step helper calls.
+# Defaults: click=20s, fill=30s, wait=15s, fallback=45s.
+scenario_step_wall_clock_cap_ms_default: 45000
+scenario_step_wall_clock_cap_ms_click: 20000
+scenario_step_wall_clock_cap_ms_fill: 30000
+scenario_step_wall_clock_cap_ms_wait: 15000
+# Write compact per-service evidence checkpoints to storage/debug/*_state.json.
+# Keep off by default; enable during reliability debugging.
+
+# KB content budget enforcement for LLM prompts
+# Hard caps to prevent KB bloat in prompts (guardians of sustainable AI)
+kb_prompt_budget:
+  max_chars: 12000          # Max chars per KB chunk in prompt (default=12k)
+  max_items: 80             # Max list items per entry (default=80)
+  max_entries: 8            # Max number of KB entries per prompt (default=8)
+  max_depth: 4              # Max nesting depth for dict/list (default=4)
+  max_files_referenced: 8   # Max distinct KB files per run (default=8)
+
+# Debug profile: relaxed but still bounded
+kb_prompt_budget_debug:
+  max_chars: 20000          # Increased for debugging (still <20k)
+  max_items: 150            # More items for analysis
+  max_entries: 16           # More entries for comprehensive debug
+  max_depth: 6              # Deeper nesting for complex structures
+  max_files_referenced: 16  # More file references allowed in debug
+scenario_evidence_dump_enabled: false
+# Hard timeout (seconds) for the optional disable-http2 retry path.
+scenario_disable_http2_retry_timeout_sec: 45
+# Navigation timeout for page.goto in milliseconds.
+browser_goto_timeout_ms: 45000
+# Fallback timeout for wait_until=commit when domcontentloaded times out.
+# Keep lower than browser_goto_timeout_ms to avoid very long double waits.
+browser_goto_commit_timeout_ms: 25000
+# Timeout for direct user actions (fill/click) in milliseconds.
+browser_action_timeout_ms: 20000
+# Wait-step timeout in milliseconds.
+browser_wait_timeout_ms: 30000
+# Minimum per-attempt Playwright timeout floor (milliseconds).
+# Prevents micro-timeout failures when remaining budget collapses.
+browser_playwright_attempt_timeout_floor_ms: 150
+# Per-selector timeout when one step has multiple fallback selectors.
+# Keeps failed selector fan-out from stalling one attempt for too long.
+browser_action_selector_timeout_ms: 4000
+browser_wait_selector_timeout_ms: 4000
+# Clamp floor for per-selector timeouts to prevent accidental sub-second unit mistakes.
+browser_selector_timeout_min_ms: 800
+# Emit warning when configured selector timeout is suspiciously low.
+browser_timeout_suspicious_low_ms: 200
+# Optional domain-toggle click selectors should fail fast if not present.
+browser_optional_toggle_selector_timeout_ms: 800
+# Optional click selectors should use a bounded timeout budget.
+# Increased from 500ms to reduce flakes on slow/loaded pages (3x multiplier).
+browser_optional_click_timeout_ms: 1500
+# Skyscanner captcha/interstitial grace window (milliseconds) before finalizing a hard
+# block in human-mimic mode. Allows one bounded PX challenge settle window only.
+skyscanner_blocked_interstitial_grace_ms: 3500
+# Skyscanner fallback reload grace window (milliseconds). Sized to allow long
+# press-and-hold verification interactions when challenge requires ~10s hold.
+skyscanner_blocked_interstitial_grace_fallback_ms: 12000
+# Bounded post-ready settle to let day-view fare cards hydrate before the browser closes.
+scenario_skyscanner_post_ready_settle_ms: 6000
+# Keep Skyscanner turn scope guard deterministic by default to avoid expensive
+# VLM/LLM scope probes on shell pages with delayed hydration.
+scenario_turn_scope_guard_vlm_enabled_skyscanner: false
+scenario_turn_scope_guard_llm_enabled_skyscanner: false
+# Skyscanner manual intervention window (seconds) for captcha/interstitial handling.
+skyscanner_captcha_manual_wait_sec: 45
+# Skyscanner post-clear stability probes before accepting challenge clearance.
+skyscanner_interstitial_clearance_checks: 4
+skyscanner_interstitial_clearance_interval_ms: 1100
+# Extra cooldown probe window to catch fast challenge re-issues after manual hold.
+skyscanner_interstitial_clearance_cooldown_probe_ms: 9000
+# Skyscanner press-hold readiness wait (milliseconds) while iframe still shows loader dots.
+skyscanner_press_hold_ready_wait_ms: 9000
+# Poll interval while waiting for press-hold readiness signals.
+skyscanner_press_hold_poll_interval_ms: 250
+# Preferred long hold duration (milliseconds) for PRESS & HOLD once ready.
+skyscanner_press_hold_min_hold_ms: 10000
+skyscanner_press_hold_degraded_min_ms: 1800
+# Results-page modal/banner guard for login or price-alert overlays.
+skyscanner_results_overlay_probe_interval_ms: 1200
+skyscanner_results_overlay_dismiss_timeout_ms: 700
+skyscanner_results_overlay_dismiss_max_clicks: 2
+# Bounded recovery for route-bound results URLs that hydrate into script-only shell.
+scenario_skyscanner_blank_shell_settle_ms: 9000
+scenario_skyscanner_post_clear_results_settle_ms: 12000
+scenario_skyscanner_blank_shell_reload_timeout_ms: 35000
+scenario_skyscanner_blank_shell_hard_nav_timeout_ms: 30000
+scenario_skyscanner_blank_shell_hard_nav_settle_ms: 2000
+scenario_skyscanner_blank_shell_manual_recovery_max_uses: 1
+scenario_skyscanner_blank_shell_manual_wait_sec: 45
+# Browser settle delays (milliseconds) for wait-to-stabilize operations.
+# Used in type_active recovery to allow focus shifts and page stabilization.
+browser_settle_wait_30ms: 30
+browser_settle_wait_40ms: 40
+# Per-site selector timeout overrides (use apply_selector_timeout_strategy helper).
+# Format: browser_action_selector_timeout_ms_<site_key>
+# Example: browser_action_selector_timeout_ms_google_flights: 3500
+# If not set, defaults to browser_action_selector_timeout_ms.
+# Settle delay (milliseconds) after pressing Enter in search form before verifying commit.
+browser_post_enter_settle_ms: 150
+# Site-specific selector fan-out caps (suffix pattern: <key>_<site_key>).
+# Keep Skyscanner lower than global default to avoid single-step wall-clock cap overruns
+# from long selector chains on localized/variant search forms.
+max_selector_candidates_skyscanner: 8
+# Reserve part of each step wall-clock cap for post-action bookkeeping/recovery.
+# Effective selector fan-out is auto-clamped from:
+#   floor((step_cap_ms - reserve_ms) / per_selector_timeout_ms)
+scenario_step_selector_budget_reserve_ms: 3000
+# Timeout (milliseconds) for waiting for results signal after search commit (including Enter or click).
+browser_search_results_wait_timeout_ms: 5000
+# Minimum contextual wait floor (milliseconds) for search-result transitions when route context is present.
+browser_search_results_contextual_min_wait_ms: 2500
+# Route verification thresholds for post-form-fill checks.
+# Max attempts for verifying filled route (0=skip extra verification, 1=try once).
+scenario_verify_max_attempts: 0
+# Wait time (milliseconds) between route verification attempt retries.
+scenario_verify_wait_ms: 500
+# Scenario -> extractor pre-extract verdict rollout (Phase 1 scaffolding).
+# v2 reads standardized `scenario_extract_verdict` from route_state artifacts.
+# Keep disabled by default to preserve legacy inference behavior while shadow-comparing.
+scenario_preextract_verdict_v2_enabled: false
+# If true, log legacy vs v2 mismatches when the v2 verdict artifact is present.
+scenario_preextract_verdict_v2_shadow_compare: true
+# Post-click wait strategy for SPA sites.
+# Settle delay (milliseconds) after click but before checking readiness.
+browser_post_click_settle_wait_ms: 200
+# Timeout (milliseconds) for waiting for post-click readiness signal (DOM/results).
+# Max total click action time = selector_timeout + post_click_settle + post_click_ready.
+browser_post_click_ready_timeout_ms: 4000
+# Google Flights: settle delay after suggestion click before verification (milliseconds).
+google_flights_suggestion_post_click_settle_ms: 250
+# Google Flights date picker Phase-2 readiness gate.
+# Enabled by default: fail early with calendar_not_open when generic dialog
+# fallback root was used and month-header detection finds zero candidates after
+# bounded readiness probes.
+gf_set_date_fallback_root_month_header_gate_enabled: true
+# Google Flights deeplink Phase-3 bounded page-state recovery.
+# If true, when a deeplink fallback reload lands on a generic flights/explore page
+# (`non_flight_scope_irrelevant_page`), attempt one bounded route-form activation
+# before failing fast. Enabled by default after bounded canary validation.
+google_flights_deeplink_page_state_recovery_enabled: true
+# Hard cap on extra page-state recovery actions in deeplink fast path.
+google_flights_deeplink_page_state_recovery_max_extra_actions: 1
+# Phase A: In deeplink recovery mode, require origin+dest route-core verification
+# before running Google date picker interactions. Prevents calendar work on generic
+# explore/irrelevant surfaces while preserving bounded retries.
+google_flights_recovery_require_route_core_before_date_fill_enabled: true
+# Phase B: bounded collaborative recovery (VLM page-kind + repair planner + planner)
+# used after route-core-before-date gate blocks Google deeplink recovery date fills.
+google_flights_recovery_collab_enabled: true
+google_flights_recovery_collab_max_vlm_page_kind_calls: 1
+google_flights_recovery_collab_max_repair_calls: 1
+google_flights_recovery_collab_max_planner_calls: 1
+google_flights_recovery_collab_route_core_only_first: true
+google_flights_recovery_collab_planner_timeout_sec: 45
+# Skip VLM page_kind classification on first turn if deeplink detected.
+scenario_deeplink_skip_vlm_first_pass: true
+# LLM/VLM call budgeting and timeout hardening (Stage 1.5)
+# Total wall-clock budget for all LLM/VLM calls per extraction phase (seconds).
+llm_budget_total_s: 600
+# Default per-call timeout (seconds). Can be overridden per model.
+llm_per_call_timeout_s_default: 120
+# Per-model timeout overrides (seconds). Format: {"model_name": timeout_s}
+# Example: {"minicpm-v:8b": 35, "qwen2.5-coder:7b": 90}
+llm_timeout_overrides: {}
+# Max attempts per LLM call stage. Format: {"stage_name": max_attempts}
+# Stages: vlm_fill_verify, vlm_extract, html_llm
+# Rationale: retry once on timeout if budget allows, but not excessively
+llm_stage_max_attempts:
+  vlm_fill_verify: 1
+  vlm_extract: 2
+  html_llm: 1
+# Minimum remaining budget (seconds) required to start a new LLM call.
+# Prevents wasting time on calls that will timeout anyway.
+llm_min_remaining_s_for_attempt: 20
+# Circuit-open cooldown (seconds). Time to wait before retrying a circuit-open model.
+# Do NOT sleep during normal execution; use this only for fast-fail gating.
+llm_circuit_open_cooldown_s: 120
+# Scenario VLM fill/submit verification timeout (seconds).
+# Per-call timeout for VLM fill verification (can exceed total budget llm_budget_total_s).
+# Rationale: VLM is independent fallback; total budget applies to LLM extraction chain only.
+# Large pages take 30-60s to encode into VLM images; multiple fill attempts need ~15-20min.
+# Increased from 480s to 1200s to accommodate large flight result pages.
+scenario_vlm_fill_verify_timeout_sec: 1200
+# VLM extraction timeout (seconds).
+# Reduced from 5400s to 2400s (reasonable upper bound). Most extractions complete in 30-120s.
+vlm_extract_timeout_sec: 2400
+# VLM attempt timeout bounds (seconds).
+# Minimum: 240s ensures ~20s setup + ~180s inference + ~40s buffer for complex pages.
+# Maximum: 2400s respects Ollama total timeout.
+vlm_attempt_timeout_min_sec: 240
+vlm_attempt_timeout_max_sec: 2400
+# Ollama connection timeout (seconds). Connection handshake budget.
+ollama_connect_timeout_sec: 60
+# Ollama read timeout (seconds).
+# Per-read/streaming timeout. Reduced from 2400s to 1200s (20min vs 40min).
+# Prevents hung models from blocking 40+ minutes. Still provides 10× safety margin.
+ollama_read_timeout_sec: 1200
+# Ollama total request timeout (seconds).
+# Absolute maximum per request. Reduced from 7200s to 3600s (1 hour vs 2 hours).
+# Enables faster failure detection and recovery in extraction salvage loops.
+ollama_total_timeout_sec: 3600
+# Ollama circuit breaker cooldown (seconds). Time to wait after a hung model before retry.
+ollama_circuit_open_sec: 120
+
+# ============================================================================
+# THRESHOLD PROFILES: Per-profile threshold overrides
+# ============================================================================
+# Profiles allow different run modes (default/debug) to override base thresholds.
+# Applied by get_thresholds_for_profile() in utils/thresholds.py.
+profiles:
+  default:
+    # Default profile: use base thresholds from above.
+    # All top-level threshold values apply unchanged.
+  debug:
+    # Debug profile: modest boosts for deeper troubleshooting.
+    # Boosts allow more attempts and longer timeouts without exceeding 1.25x guardrail.
+    scenario_max_retries: 5              # base: 4 (+1)
+    scenario_max_turns: 3                # base: 2 (+1)
+    browser_action_selector_timeout_ms: 5000  # base: 4000 (+25%)
+    gf_set_date_max_actions: 35          # base: 20 (+75%)
+    scenario_step_wall_clock_cap_ms: 60000    # base: 45000 (+33%)
+    browser_goto_timeout_ms: 60000       # base: 45000 (+33%)
+
+# ============================================================================
+# DEBUG BUDGETS: Reason-aware escalation when debug mode enabled
+# ============================================================================
+# Philosophy: Collect MORE evidence with disciplined escalation, not just "wait longer".
+# When debug=False: No behavior change (all multipliers=1.0, deltas=0).
+# When debug=True: Apply profile-specific and reason-specific budgets.
+#
+# enabled: Set to true to activate debug budgets. When false, debug mode uses standard budgets.
+debug_budgets_enabled: true
+# Profile: 'lite', 'deep', or 'super_deep' (long exploratory debug runs).
+debug_profile: lite
+# Max escalation levels per failure within one scenario attempt (0=no escalation).
+debug_escalation_max_steps: 2
+# Optional per-profile escalation cap overrides.
+debug_escalation_max_steps_super_deep: 4
+
+# Timeout multipliers by profile (1.0 = no change from standard timeouts).
+debug_timeout_multiplier_lite: 1.2
+debug_timeout_multiplier_deep: 2.0
+debug_timeout_multiplier_super_deep: 3.0
+
+# Retry delta (additional attempts) by profile.
+debug_retry_delta_lite: 0
+debug_retry_delta_deep: 1
+debug_retry_delta_super_deep: 2
+
+# Optional profile-level evidence bundles (merged with reason-specific bundles).
+debug_evidence_bundle_super_deep: screenshot,dom_slice,selector_diagnostics,overlay_diagnostics,form_snapshot,dialog_dom_slice,calendar_header_candidates
+
+# Reason-specific overrides: syntax is "reason_code: {multiplier_lite, multiplier_deep, retry_lite, retry_deep}"
+# Format: key=reason_code value is colon-separated "mult_lite:mult_deep:retry_lite:retry_deep"
+# Example: action_deadline_exceeded_before_click: 1.3:2.5:1:2
+#
+# Each reason_code is mapped to evidence_bundle discovery rules:
+#   - screenshot: existing screenshot hook
+#   - dom_slice: reuse existing DOM slicing utilities
+#   - selector_diagnostics: selectors tried + visible/enabled/overlay booleans
+#   - overlay_diagnostics: overlay detection heuristics
+#   - calendar_header_candidates: month header candidate count (date picker specific)
+#   - form_snapshot: form field state snapshot
+#   - field_observed_vs_expected: observed vs expected values for route_fill_mismatch
+#   - llm_metrics: LLM call timing, token counts
+#   - circuit_state: circuit breaker state (open/half-open/closed)
+#   - dialog_dom_slice: dialog-specific DOM slice (date picker specific)
+#
+# Reason-specific timeout/retry adjustments (lite:deep format, or single value for both):
+debug_reason_overrides_action_deadline_exceeded_before_click: 1.3:2.5:1:2
+debug_reason_overrides_transport_timeout: 1.0:1.0:1:2
+debug_reason_overrides_circuit_open: 1.0:1.0:0:1
+debug_reason_overrides_calendar_not_open: 1.1:1.5:0:0
+debug_reason_overrides_month_nav_exhausted: 1.0:1.2:0:0
+debug_reason_overrides_route_fill_mismatch: 1.0:1.0:0:0
+
+# Evidence bundles to collect for each reason (comma-separated, best-effort capture).
+debug_evidence_bundle_action_deadline_exceeded_before_click: screenshot,dom_slice,selector_diagnostics
+debug_evidence_bundle_transport_timeout: llm_metrics,circuit_state
+debug_evidence_bundle_circuit_open: llm_metrics,circuit_state
+debug_evidence_bundle_calendar_not_open: screenshot,dom_slice,overlay_diagnostics,selector_diagnostics
+debug_evidence_bundle_month_nav_exhausted: dialog_dom_slice,calendar_header_candidates
+debug_evidence_bundle_route_fill_mismatch: form_snapshot,field_observed_vs_expected

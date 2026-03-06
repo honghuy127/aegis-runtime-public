@@ -1,0 +1,505 @@
+version: '1.0'
+last_updated: '2026-02-26'
+total_invariants: 50
+invariants:
+- id: INV-SCENARIO-001
+  title: Global wall-clock timeouts MUST abort immediately
+  statement: Global wall-clock timeout errors (e.g., Playwright 120s timeout) MUST
+    propagate immediately and MUST NOT be retried with alternative selectors.
+  rationale: Wall-clock timeouts indicate infrastructure-level failure, not selector
+    mismatch. Retrying wastes time and resources.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_execute_plan_propagates_timeout_error
+  modules:
+  - core/scenario_runner.py
+- id: INV-SCENARIO-002
+  title: Selector timeouts MUST be bounded and clamped
+  statement: "Selector timeout values MUST be clamped to a safe minimum (\u2265800ms\
+    \ for Google Flights). Suspicious low values (e.g., <200ms) MUST be raised to\
+    \ configured minimums."
+  rationale: Prevents selector spam and thrashing from overly aggressive timeout configurations.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_execute_plan_clamps_suspicious_low_selector_timeout
+  - tests/test_scenario_runner_timeouts.py::test_execute_plan_google_single_selector_uses_bounded_timeout
+  modules:
+  - core/scenario_runner.py
+  - core/browser/timeouts.py
+- id: INV-SCENARIO-003
+  title: Optional fill actions MUST skip expensive recovery chains
+  statement: 'When a fill action is marked `optional: true`, failure MUST result in
+    soft-fail without invoking recovery fallbacks (activate_field_by_keywords, fill_by_keywords,
+    type_active).'
+  rationale: Optional actions should fail fast without wasting action budget on recovery
+    attempts.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_execute_plan_optional_google_fill_skips_recovery_chain
+  modules:
+  - core/scenario_runner.py
+- id: INV-SCENARIO-004
+  title: Depart date fill MUST soft-pass when date already bound in DOM
+  statement: Mandatory depart date fill MUST succeed (soft-pass) if the target date
+    value is already present in the DOM, even if direct fill() fails.
+  rationale: Google Flights may pre-populate date fields; verifying existing DOM state
+    avoids false negatives.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_execute_plan_google_depart_fill_soft_pass_when_value_already_bound
+  modules:
+  - core/scenario_runner.py
+- id: INV-SCENARIO-005
+  title: Plugin readiness probes MUST be consumed when actionable
+  statement: Plugin readiness probe output MUST override scenario readiness state
+    when probe is actionable and more informative than current state.
+  rationale: Plugins may have superior context (e.g., VLM vision analysis) compared
+    to heuristic-only scenario state.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_plugin_readiness_probe_consumed_when_actionable
+  modules:
+  - core/scenario_runner.py
+- id: INV-BUDGET-001
+  title: ActionBudget MUST track and enforce action limits
+  statement: 'ActionBudget instances MUST: Initialize with `max_actions` count, Decrement
+    `remaining` on consumption, Reject consumption requests exceeding remaining budget,
+    Support reset with optional new max_actions.'
+  rationale: Prevents unbounded selector spam and infinite retry loops.
+  test_refs:
+  - tests/test_gf_set_date.py::TestActionBudget::test_budget_initialization
+  - tests/test_gf_set_date.py::TestActionBudget::test_budget_consume
+  - tests/test_gf_set_date.py::TestActionBudget::test_budget_exhaustion
+  - tests/test_gf_set_date.py::TestActionBudget::test_budget_reset
+  modules:
+  - core/scenario/types.py::ActionBudget
+- id: INV-BUDGET-002
+  title: Wall-clock extraction cap MUST skip legacy extraction when hit
+  statement: When wall-clock extraction timeout is reached, legacy extraction path
+    MUST be skipped and empty extraction returned with reason=extraction_deadline_hit.
+  rationale: Prevents cascading timeouts; extraction deadline is hard wall-clock cap.
+  test_refs:
+  - tests/test_extractor.py::test_extraction_deadline_hit_skips_legacy_chain
+  modules:
+  - core/extractor.py
+- id: INV-BUDGET-003
+  title: Wall-clock cap helper MUST only trigger when enabled and exceeded
+  statement: 'Wall-clock cap guard MUST only block execution when: cap is enabled
+    (cap_ms > 0) AND elapsed_ms > cap_ms. Must not block if cap disabled or time not
+    exceeded.'
+  rationale: Prevents premature aborts; cap is opt-in gate.
+  test_refs:
+  - tests/test_extractor.py::test_wall_clock_cap_only_blocks_when_enabled_and_exceeded
+  modules:
+  - main.py
+  - core/extractor.py::_extract_wall_clock_cap_payload
+- id: INV-BUDGET-004
+  title: Browser commit timeout MUST NOT exceed goto timeout
+  statement: Browser action commit timeout MUST NOT be set higher than goto timeout
+    to avoid deadlocks.
+  rationale: Prevents commit operations from outliving page load budget.
+  test_refs:
+  - tests/test_browser_timeouts.py::test_commit_timeout_capped_to_goto_timeout
+  modules:
+  - core/browser/session.py
+- id: INV-BUDGET-005
+  title: Remaining browser timeout MUST apply floor to prevent zero timeout
+  statement: When computing remaining browser timeout from deadline, result MUST be
+    floored to minimum threshold (e.g., 500ms) to prevent zero-timeout selector spam.
+  rationale: Prevents degenerate selector behavior at deadline edge.
+  test_refs:
+  - tests/test_browser_timeouts.py::test_remaining_timeout_applies_floor
+  modules:
+  - core/browser/framework.py::BrowserFrameworkHelper.remaining_timeout_ms
+- id: INV-RECOVERY-001
+  title: Heuristic fallback MUST extract minimum visible fare when LLM misses price
+  statement: When LLM extraction returns empty/null price, heuristic fallback MUST
+    extract minimum visible fare from results panel.
+  rationale: Ensures extraction always attempts deterministic fallback before giving
+    up.
+  test_refs:
+  - tests/test_extractor.py::test_heuristic_fallback_extracts_minimum_fare
+  modules:
+  - core/extractor.py
+- id: INV-RECOVERY-002
+  title: Route context MUST filter heuristic extraction
+  statement: Heuristic extraction MUST reject prices when route context check fails
+    (origin/dest mismatch with intended trip).
+  rationale: Prevents extracting prices from wrong route (e.g., Tokyo-Osaka when querying
+    Tokyo-Seoul).
+  test_refs:
+  - tests/test_extractor.py::test_heuristic_extraction_rejects_route_mismatch
+  modules:
+  - core/extractor.py
+- id: INV-RECOVERY-003
+  title: Short metro codes MUST NOT match city name substrings
+  statement: "Short metro codes (\u22643 chars) MUST NOT match city name substrings\
+    \ to avoid false positives (e.g., 'IT' in 'NARITA')."
+  rationale: Prevents substring false matches in route validation.
+  test_refs:
+  - tests/test_route_binding.py::test_short_metro_codes_no_substring_match
+  modules:
+  - core/route_binding.py
+- id: INV-RECOVERY-004
+  title: Irrelevant page downgrade MUST require medium+ confidence VLM
+  statement: To override heuristic BLOCK verdict with VLM page_kind=flights_results,
+    VLM confidence MUST be >= medium.
+  rationale: Prevents low-confidence VLM from overriding strong heuristic signals.
+  test_refs:
+  - tests/test_scope_reconciliation.py::test_vlm_confidence_gate_for_downgrade
+  modules:
+  - core/scope_reconciliation.py
+- id: INV-RECOVERY-005
+  title: Error handling MUST NOT expose exceptions to callers
+  statement: Public extraction/scenario APIs MUST catch and log exceptions, returning
+    structured error result instead of propagating exception.
+  rationale: Ensures callers always receive structured result, never raw exception.
+  test_refs:
+  - tests/test_extractor.py::test_extraction_exception_returns_error_result
+  modules:
+  - core/extractor.py
+  - core/scenario_runner.py
+- id: INV-SELECTOR-001
+  title: IATA ranking MUST prioritize parenthesized codes highest
+  statement: IATA ranking MUST assign rank 3 (highest) to exact matches or parenthesized
+    codes like '(NRT)', rank 2 to embedded parenthesized codes.
+  rationale: Parenthesized codes are canonical airport identifiers in autocomplete
+    suggestions.
+  test_refs:
+  - tests/test_combobox_commit.py::test_iata_ranking_prioritizes_parenthesized
+  modules:
+  - core/scenario/google_flights.py::rank_iata_suggestion
+- id: INV-SELECTOR-002
+  title: IATA validation MUST enforce 3-letter alphabetic format
+  statement: IATA codes MUST match ^[A-Z]{3}$ pattern. Non-conforming codes MUST be
+    rejected.
+  rationale: Prevents false matches with numeric codes or malformed inputs.
+  test_refs:
+  - tests/test_combobox_commit.py::test_iata_validation_rejects_non_alphabetic
+  modules:
+  - core/scenario/google_flights.py::validate_iata
+- id: INV-SELECTOR-003
+  title: Substring IATA matches MUST require explicit click decision
+  statement: "When IATA appears as substring within suggestion (not parenthesized),\
+    \ ranking MUST be \u2264 rank 1 and click decision explicit."
+  rationale: Prevents accidental clicks on partial matches.
+  test_refs:
+  - tests/test_combobox_commit.py::test_substring_iata_requires_explicit_click
+  modules:
+  - core/scenario/google_flights.py
+- id: INV-SELECTOR-004
+  title: Button text selectors MUST NEVER emit bare text= patterns
+  statement: Text-based button selectors MUST use :has-text() or getByRole with name
+    parameter. MUST NOT emit bare text= patterns.
+  rationale: Bare text= patterns are brittle and Playwright-incompatible.
+  test_refs:
+  - tests/test_selectors.py::test_button_text_selectors_no_bare_text
+  modules:
+  - core/ui_tokens.py::build_button_text_selectors
+- id: INV-SELECTOR-005
+  title: Timeout for Google Flights fill MUST NEVER be tiny
+  statement: Google Flights fill actions MUST have timeout >= 800ms. Values < 800ms
+    MUST be clamped.
+  rationale: Google Flights UI is heavy; tiny timeouts cause false negatives.
+  test_refs:
+  - tests/test_scenario_runner_timeouts.py::test_google_flights_fill_timeout_clamped
+  modules:
+  - core/scenario_runner.py
+- id: INV-I18N-001
+  title: Token prioritization MUST reorder by locale hint
+  statement: When locale hint provided (e.g., ja), tokens MUST be reordered to prioritize
+    locale-specific variants before English.
+  rationale: Improves selector hit rate for non-English UIs.
+  test_refs:
+  - tests/test_service_ui_profiles.py::test_localized_list_prioritizes_locale
+  modules:
+  - core/service_ui_profiles.py::profile_localized_list
+- id: INV-I18N-002
+  title: Text normalization MUST fold full-width characters and spacing
+  statement: Text matching MUST normalize full-width alphanumerics and collapse whitespace
+    before comparison.
+  rationale: Prevents false mismatches in Japanese/Chinese UIs.
+  test_refs:
+  - tests/test_i18n.py::test_text_normalization_folds_full_width
+  modules:
+  - utils/text_utils.py::normalize_text
+- id: INV-I18N-003
+  title: Placeholder matching MUST use normalized exact match
+  statement: Placeholder detection MUST use normalized exact match (not substring)
+    to avoid false positives.
+  rationale: Prevents matching instructional text as placeholder.
+  test_refs:
+  - tests/test_route_binding.py::test_placeholder_matching_exact_normalized
+  modules:
+  - core/route_binding.py
+- id: INV-PLUGIN-001
+  title: Route binding gate MUST accept weak support when strong not required
+  statement: Route binding gate MUST accept weak support (confidence < 0.8) when gate
+    policy does not require strong evidence.
+  rationale: Allows progressive degradation for looser validation contexts.
+  test_refs:
+  - tests/test_route_binding.py::test_gate_accepts_weak_when_strong_not_required
+  modules:
+  - core/route_binding.py::route_binding_gate
+- id: INV-PLUGIN-002
+  title: Route binding gate MUST reject weak support when strong required
+  statement: Route binding gate MUST reject weak support when gate policy requires
+    strong evidence (confidence >= 0.8).
+  rationale: Enforces strict validation requirements for critical gates.
+  test_refs:
+  - tests/test_route_binding.py::test_gate_rejects_weak_when_strong_required
+  modules:
+  - core/route_binding.py::route_binding_gate
+- id: INV-PLUGIN-003
+  title: DOM/VLM fusion MUST promote weak to strong when both affirm
+  statement: When both DOM and VLM signals affirm route binding (even if individually
+    weak), fusion MUST promote to strong support.
+  rationale: Cross-modal agreement increases confidence.
+  test_refs:
+  - tests/test_route_binding.py::test_fusion_promotes_weak_to_strong
+  modules:
+  - core/route_binding.py::fuse_route_evidence
+- id: INV-PLUGIN-004
+  title: Scope conflict resolution MUST require strong route support to override
+  statement: To override scope BLOCK verdict, route binding support MUST be strong
+    (confidence >= 0.8) and VLM must affirm flights_results.
+  rationale: Prevents weak evidence from overriding strong negative signals.
+  test_refs:
+  - tests/test_scope_reconciliation.py::test_scope_override_requires_strong_route
+  modules:
+  - core/scope_reconciliation.py
+- id: INV-PLUGIN-005
+  title: Explicit DOM mismatch MUST block route binding support
+  statement: When DOM probe detects explicit mismatch (wrong origin/dest in route
+    chips), route binding support MUST be denied (confidence = 0.0).
+  rationale: Explicit contradictions override weak positive signals.
+  test_refs:
+  - tests/test_route_binding.py::test_explicit_dom_mismatch_blocks_support
+  modules:
+  - core/route_binding.py
+- id: INV-EVIDENCE-001
+  title: StepResult MUST support success and failure factory methods
+  statement: 'StepResult class MUST provide @staticmethod factories: success(...)
+    and failure(reason, evidence, ...).'
+  rationale: Ensures consistent StepResult construction patterns.
+  test_refs:
+  - tests/test_gf_set_date.py::test_step_result_success_factory
+  - tests/test_gf_set_date.py::test_step_result_failure_factory
+  modules:
+  - core/scenario/types.py::StepResult
+- id: INV-EVIDENCE-002
+  title: gf_set_date MUST validate role and date format before execution
+  statement: "gf_set_date() MUST validate role \u2208 {depart, return} and date is\
+    \ datetime object before attempting calendar interaction."
+  rationale: Prevents invalid inputs from causing cryptic failures.
+  test_refs:
+  - tests/test_gf_set_date.py::test_gf_set_date_validates_role
+  - tests/test_gf_set_date.py::test_gf_set_date_validates_date_format
+  modules:
+  - core/scenario/google_flights.py::gf_set_date
+- id: INV-EVIDENCE-003
+  title: Extraction result schema MUST include required fields
+  statement: 'Extraction result MUST include: price (float|None), currency (str|None),
+    confidence (str), source (str), reason (str|None).'
+  rationale: Ensures uniform extraction result schema.
+  test_refs:
+  - tests/test_extractor.py::test_extraction_result_schema
+  modules:
+  - core/extractor.py
+- id: INV-STORAGE-001
+  title: Storage layer MUST NOT import Playwright or browser modules
+  statement: Modules under storage/ MUST NOT import Playwright or core.browser to
+    maintain separation of concerns.
+  rationale: Prevents storage layer from creating browser-coupled logic.
+  test_refs:
+  - tests/test_architecture_storage.py::test_storage_no_browser_imports
+  modules:
+  - storage/*
+- id: INV-STORAGE-002
+  title: LLM layer MUST NOT import scenario modules
+  statement: Modules under llm/ MUST NOT import core.scenario.* to prevent circular
+    dependencies.
+  rationale: Keeps LLM layer reusable and scenario-agnostic.
+  test_refs:
+  - tests/test_architecture_storage.py::test_llm_no_scenario_imports
+  modules:
+  - llm/*
+- id: INV-PROMPT-001
+  title: Prompt templates MUST retain JSON schema blocks
+  statement: When updating prompt templates, JSON schema blocks MUST be preserved
+    verbatim unless schema change is intentional.
+  rationale: Prevents accidental schema drift that breaks parsers.
+  test_refs:
+  - tests/test_prompts.py::test_prompt_schema_blocks_preserved
+  modules:
+  - llm/prompts/*
+- id: INV-PROMPT-002
+  title: Prompt registry MUST resolve existing template IDs
+  statement: Prompt registry MUST resolve all template IDs referenced in code without
+    raising KeyError.
+  rationale: Prevents runtime errors from missing prompt refs.
+  test_refs:
+  - tests/test_prompts.py::test_prompt_registry_resolves_all_ids
+  modules:
+  - llm/prompts/registry.py
+- id: INV-PROMPT-003
+  title: Validators MUST accept existing valid payload shapes
+  statement: Schema validators MUST accept payloads that were valid under previous
+    schema version (backward compatibility).
+  rationale: Prevents breaking existing valid data.
+  test_refs:
+  - tests/test_prompts.py::test_validator_backward_compatible
+  modules:
+  - llm/json_parsing.py
+- id: INV-PROMPT-004
+  title: Scenario/repair prompts MUST constrain action vocabulary
+  statement: Scenario/repair prompts MUST include closed action vocabulary (fill,
+    click, wait, etc.) and reject LLM hallucinated actions.
+  rationale: Prevents LLM from generating unsupported action types.
+  test_refs:
+  - tests/test_prompts.py::test_scenario_prompt_constrains_vocabulary
+  modules:
+  - llm/prompts/scenario.py
+- id: INV-PARSE-001
+  title: JSON parser MUST tolerate fenced code blocks
+  statement: JSON parser MUST extract JSON from fenced code blocks (```json...```)
+    in addition to bare JSON.
+  rationale: Handles LLM habit of wrapping JSON in markdown fences.
+  test_refs:
+  - tests/test_json_parsing.py::test_parser_tolerates_fenced_blocks
+  modules:
+  - llm/json_parsing.py
+- id: INV-PARSE-002
+  title: Price coercion MUST preserve null with reason
+  statement: When coercing price to float fails, result MUST be null with diagnostic
+    reason (not exception or empty string).
+  rationale: Preserves failure traceability.
+  test_refs:
+  - tests/test_extractor.py::test_price_coercion_preserves_null_with_reason
+  modules:
+  - llm/json_parsing.py::coerce_price_payload_from_raw
+  - llm/code_model.py::_coerce_price_payload_from_raw
+- id: INV-PARSE-003
+  title: Base domain extraction MUST handle public suffixes
+  statement: Base domain extraction MUST handle multi-level public suffixes (e.g.,
+    co.uk, ne.jp) correctly.
+  rationale: Prevents domain extraction errors for international TLDs.
+  test_refs:
+  - tests/test_utils.py::test_base_domain_handles_public_suffixes
+  modules:
+  - utils/url_utils.py::extract_base_domain
+- id: INV-IMAGE-001
+  title: VLM image variants MUST deduplicate identical blobs
+  statement: When multiple screenshots are byte-identical, VLM API calls MUST deduplicate
+    by content hash.
+  rationale: Avoids sending redundant images to VLM API.
+  test_refs:
+  - tests/test_vlm.py::test_image_variants_deduplicate
+  modules:
+  - llm/vlm/image_variants.py
+- id: INV-IMAGE-002
+  title: VLM image variants MUST apply byte cap
+  statement: Total image payload sent to VLM MUST be capped (e.g., 5MB) to prevent
+    API rejection.
+  rationale: Respects VLM API limits.
+  test_refs:
+  - tests/test_vlm.py::test_image_variants_apply_byte_cap
+  modules:
+  - llm/vlm/image_variants.py
+- id: INV-SERVICE-001
+  title: Preferred URL MUST stay first when split-flow inactive
+  statement: 'When knowledge indicates `site_type: single_flow`, preferred_url MUST
+    remain first in candidate URL list.'
+  rationale: Single-flow sites don't need domestic/international splitting; preferred
+    URL should be prioritized.
+  test_refs:
+  - tests/test_refactor_safety_stage0.py::test_service_url_candidates_keeps_preferred_first_for_single_flow
+  modules:
+  - core/services.py::service_url_candidates
+- id: INV-ADAPTER-001
+  title: Exactly ONE site UI driver is active per run (agent OR legacy, never both)
+  statement: 'At any point in a scenario run, exactly one UI driver is active for
+    a given site: Either agent framework (GoogleFlightsPlugin + AgentEngine), OR Legacy
+    scenario flow (core/scenario/google_flights.py), OR Neither (if both unavailable
+    with fallback disabled).'
+  rationale: Prevents duplicate interactions (e.g., form fills happening twice) and
+    simplifies debugging. Clear ownership reduces fix-landing errors.
+  test_refs:
+  - tests/test_site_adapter_registry.py::test_adapter_selection_prefers_agent_when_available
+  - tests/test_site_adapter_registry.py::test_adapter_fallback_to_legacy_only_when_enabled
+  - tests/test_site_adapter_registry.py::test_adapter_per_site_override_enforced
+  modules:
+  - core/site_adapter_registry.py::get_adapter
+  - core/scenario_runner.py::_try_agent_v0_optional
+- id: INV-ADAPTER-002
+  title: UI driver selection is config-driven with safe fallback
+  statement: 'UI driver selection MUST follow this precedence: 1. Per-site override
+    in config.ui_driver_overrides[site_id], 2. Default mode from config.ui_driver_mode
+    (default: ''agent''), 3. At bind time: if selected driver fails and config.ui_driver_fallback_to_legacy=true,
+    fallback to legacy, 4. If no fallback available, raise clear diagnostic error
+    (not silent failure).'
+  rationale: Makes driver selection explicit and testable; fallback policy is configurable
+    for staging/prod differences.
+  test_refs:
+  - tests/test_site_adapter_registry.py::test_adapter_config_overrides_mode
+  - tests/test_site_adapter_registry.py::test_adapter_fallback_disabled_raises_error
+  modules:
+  - core/site_adapter_registry.py
+  - core/run_input_config.py
+- id: INV-ADAPTER-003
+  title: Service extraction MUST be extraction-only (no browser interactions)
+  statement: 'Modules under core/plugins/services/ (e.g., google_flights.py) MUST
+    NOT: Import or use browser automation modules (Playwright, core.browser), Call
+    click, fill, goto, or other DOM-writing actions, Attempt to wait for elements
+    or perform retries. All interactions are the responsibility of the UI driver.
+    Service modules are parsing-only.'
+  rationale: Clear separation of concerns prevents fixes from landing in wrong places.
+    Extraction logic remains testable without browser.
+  test_refs:
+  - tests/test_architecture_site_ownership.py::test_extraction_service_modules_have_no_browser_imports
+  modules:
+  - core/plugins/services/*
+- id: INV-ADAPTER-004
+  title: Scenario site modules must not accumulate new UI logic
+  statement: 'Modules under core/scenario/ bearing site names (e.g., google_flights.py)
+    MUST: Only be used as legacy fallback drivers, Accept NO NEW site-interaction
+    logic, New UI logic goes into agent adapters (core/agent/plugins/<site>/) or shared
+    utils utils/ or patterns docs.'
+  rationale: Prevents legacy code from growing indefinitely. New features go to agent-first
+    paths.
+  test_refs:
+  - tests/test_architecture_site_ownership.py::test_scenario_site_modules_are_legacy_only
+  modules:
+  - core/scenario/<site>.py
+- id: INV-ADAPTER-005
+  title: Fallback events MUST be logged with diagnostic context
+  statement: 'When UI driver fallback occurs at bind time (e.g., agent fails, fallback
+    to legacy): Event MUST be logged with key ui_driver.fallback, Evidence MUST include:
+    site (site ID), from (original driver mode), to (fallback driver mode), reason
+    (bind failure reason), Log level: WARNING (operator-visible).'
+  rationale: Enables SRE detection of fallback patterns and driver health issues.
+  test_refs:
+  - tests/test_site_adapter_registry.py::test_adapter_fallback_is_logged
+  modules:
+  - core/site_adapter_registry.py::bind_with_fallback
+- id: INV-DOCS-001
+  title: Coding agents MUST use KB-first planning before patching behavior
+  statement: 'For behavioral or structural changes, coding agents MUST: Consult canonical
+    KB entrypoints and task-relevant KB docs before planning/coding, Prefer KB-indexed
+    docs over archived/history docs, Cite consulted KB docs in planning notes or review
+    summaries.'
+  rationale: Prevents ad-hoc patches that violate existing invariants and improves
+    consistency across human and AI contributors.
+  test_refs:
+  - AGENTS.md KB-First Planning Gate (Mandatory)
+  - utils/agent_preflight.py
+  modules:
+  - AGENTS.md
+  - utils/agent_preflight.py
+  - docs/kb/*
+- id: INV-REGISTRY-004
+  title: Site adapter fallback MUST compare adapter type, not instance identity
+  statement: In `SiteAdapterRegistry.bind_with_fallback`, fallback eligibility MUST
+    detect an agent adapter by type/class semantics (or explicit registry membership),
+    and MUST NOT use identity comparison against a newly-instantiated adapter object.
+  rationale: Comparing against a new instance always fails identity checks and can
+    silently disable configured fallback-to-legacy behavior.
+  test_refs:
+  - tests/test_audit_site_adapter_fallback.py::test_fallback_enabled_should_try_legacy
+  modules:
+  - core/site_adapter_registry.py::bind_with_fallback

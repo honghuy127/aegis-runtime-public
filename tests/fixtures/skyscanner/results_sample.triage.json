@@ -1,0 +1,26 @@
+{
+  "schema_version": "fixture_triage_v1",
+  "site": "skyscanner",
+  "fixture_name": "results_sample",
+  "fixture_path": "tests/fixtures/skyscanner/results_sample.html",
+  "captured_from": {},
+  "page_kind": "flights_results",
+  "locale_hint": "en-US",
+  "signals": {
+    "has_price_token": true,
+    "has_results_list": true,
+    "has_calendar_dialog": false,
+    "has_origin_dest_inputs": false
+  },
+  "expected": {
+    "extraction": {
+      "status": "ok",
+      "currency": "USD"
+    },
+    "ui_driver": {
+      "readiness": "ready"
+    }
+  },
+  "kb_refs": [],
+  "notes": ""
+}

@@ -1,0 +1,346 @@
+# Triage Decision Table
+# Machine-readable triage flow for runtime failures
+# See: triage_runbook.md for navigation index
+
+version: "1.0"
+last_updated: "2026-03-06"
+
+purpose: "Deterministic troubleshooting flow for Flight Price Watcher failures."
+audience: ["AI agents", "developers", "runtime operators"]
+authority: "Canonical guide for diagnosing StepResult.reason codes via evidence fields and logs."
+
+commands:
+  triage_basic: "python -m utils.triage"
+  triage_reason: "python -m utils.triage --reason <reason> --show-evidence"
+  triage_json: "python -m utils.triage --json --lookback <hours>"
+  triage_top_n: "python -m utils.triage --top-n <n> --lookback <hours>"
+
+inputs:
+  - "storage/latest_run_id.txt"
+  - "storage/runs/<run_id>/scenario_last_error.json"
+  - "storage/runs/<run_id>/artifacts/"
+
+output_modes:
+  human:
+    description: "Readable summary with top reasons and next steps"
+  json:
+    description: "Machine-readable reason summaries"
+
+kb_cards:
+  enabled_by:
+    flags: ["--with-cards"]
+    config: "configs/run.yaml: kb_cards_enabled"
+  limits:
+    cards_limit_flag: "--cards-limit <n>"
+    strict_flag: "--cards-strict"
+  output_includes:
+    - "card title"
+    - "path"
+    - "actions_allowed"
+    - "evidence_required"
+    - "kb_links"
+
+auto_heal:
+  purpose: "Debug-only triage + bounded patch proposal workflow"
+  status: "Off by default"
+  commands:
+    dry_run: "python -m utils.auto_heal"
+    apply: "python -m utils.auto_heal --apply"
+    apply_llm: "python -m utils.auto_heal --apply --llm"
+    test_cmd: "python -m utils.auto_heal --apply --test-cmd 'pytest -q tests/test_failure_reasons.py'"
+  config:
+    auto_heal_enabled: false
+    auto_heal_apply_patch: false
+    auto_heal_max_files: 2
+    auto_heal_max_changed_lines: 80
+    auto_heal_test_cmd: "pytest -q tests/test_failure_reasons.py"
+    auto_heal_llm_enabled: false
+  bounds:
+    max_files: 2
+    max_changed_lines: 80
+    max_attempts: 1
+  output_report: "storage/debug/auto_heal/<run_id>/report.json"
+
+reason_tree:
+  date_picker_failures:
+    - code: "calendar_dialog_not_found"
+      legacy_aliases:
+        - "calendar_not_open"
+      summary: "Calendar dialog never appeared after clicking date field"
+      likely_causes:
+        - "Date field selector mismatch"
+        - "Element stale before calendar render"
+        - "Calendar hidden/off-screen"
+        - "Render exceeded timeout"
+        - "JS error prevented init"
+      evidence_keys:
+        - "ui.selector_attempts"
+        - "dom.root_detected"
+        - "selector_used"
+        - "calendar.snapshot_path"
+      artifacts:
+        - "storage/runs/<run_id>/artifacts/calendar_snapshot_<role>_<ts>.json"
+      first_fixes:
+        - "Inspect snapshot HTML fragment"
+        - "Verify date field selector"
+        - "Increase timeout (bounded)"
+      escalation:
+        - "Selector strategy retrain if attempts >= 5"
+        - "Investigate scroll/focus if off-screen"
+      related_docs:
+        - "docs/kb/30_patterns/date_picker.md"
+        - "docs/kb/30_patterns/selectors.md"
+
+    - code: "month_nav_exhausted"
+      summary: "Calendar opened but target month not reached within max steps"
+      likely_causes:
+        - "Target date beyond nav window"
+        - "Month parsing failed (locale)"
+        - "Nav buttons broken or stale"
+      evidence_keys:
+        - "calendar.nav_steps"
+        - "calendar.target_month"
+        - "calendar.current_month"
+        - "role"
+      first_fixes:
+        - "Verify target date within allowed range"
+        - "Check month parsing in snapshot"
+      escalation:
+        - "Nav selector update or locale parsing fix"
+      related_docs:
+        - "docs/kb/30_patterns/date_picker.md#month-navigation"
+        - "docs/kb/30_patterns/i18n_ja.md#month-header-parsing"
+
+    - code: "calendar_day_not_found"
+      summary: "Target day element not found in calendar"
+      likely_causes:
+        - "Day selector pattern outdated"
+        - "Locale-specific aria-label format"
+        - "Day disabled/unavailable"
+      evidence_keys:
+        - "calendar.day"
+        - "calendar.current_month"
+        - "dom.selectors_tried"
+      first_fixes:
+        - "Inspect day element in debug HTML"
+        - "Update aria-label match patterns"
+      escalation:
+        - "Selector learning or locale expansion"
+      related_docs:
+        - "docs/kb/30_patterns/date_picker.md#day-selection"
+
+    - code: "date_picker_unverified"
+      summary: "Date set but verify read-back failed"
+      likely_causes:
+        - "Verify selector incorrect"
+        - "Async update race"
+        - "Wrong field read-back"
+      evidence_keys:
+        - "verify.verified_value"
+        - "verify.method"
+        - "selector_used"
+      first_fixes:
+        - "Add brief delay before verify"
+        - "Use fallback verification selector"
+      escalation:
+        - "Field structure change; update verify heuristics"
+      related_docs:
+        - "docs/kb/30_patterns/date_picker.md#verification"
+
+  location_failures:
+    - code: "iata_mismatch"
+      summary: "IATA code committed but does not match expected"
+      likely_causes:
+        - "Wrong suggestion clicked"
+        - "Dropdown stale or slow"
+        - "Verify selector reading wrong field"
+      evidence_keys:
+        - "suggest.suggestion_text"
+        - "suggest.suggestion_rank"
+        - "verify.verified_value"
+      first_fixes:
+        - "Compare suggestion text to expected IATA"
+        - "Check aria_valuenow or alternate verify selector"
+      escalation:
+        - "Ranking logic update or locale handling"
+      related_docs:
+        - "docs/kb/30_patterns/combobox_commit.md#iata-ranking"
+
+    - code: "suggestion_not_found"
+      legacy_aliases:
+        - "no_suggestion_match"
+      summary: "No suggestion matching typed IATA"
+      likely_causes:
+        - "Invalid IATA"
+        - "Suggestions timed out"
+        - "UI layout changed"
+      evidence_keys:
+        - "suggest.input_text"
+        - "suggest.listbox_selector"
+      first_fixes:
+        - "Validate IATA"
+        - "Increase suggestion settle timeout"
+      escalation:
+        - "Fallback to city search or update suggestion detection"
+      related_docs:
+        - "docs/kb/30_patterns/combobox_commit.md#suggestions"
+
+  budget_timeout_failures:
+    - code: "budget_hit"
+      summary: "Action budget exhausted"
+      likely_causes:
+        - "Selector spam"
+        - "Retry loop"
+        - "Optional action not skipped"
+      evidence_keys:
+        - "budget.action_count"
+        - "budget.max"
+        - "ui.selector_attempts"
+      first_fixes:
+        - "Reduce selector attempts"
+        - "Confirm optional action gating"
+      escalation:
+        - "Selector learning / refactor"
+      related_docs:
+        - "docs/kb/10_runtime_contracts/budgets_timeouts.md#action-budget"
+
+    - code: "wall_clock_timeout"
+      legacy_aliases:
+        - "timeout_error"
+      summary: "Wall-clock timeout exceeded"
+      likely_causes:
+        - "Network latency"
+        - "Automation hang"
+        - "Timeout too low"
+      evidence_keys:
+        - "time.remaining_ms"
+        - "time.deadline_ms"
+      first_fixes:
+        - "Check infra latency"
+        - "Increase global timeout (bounded)"
+      escalation:
+        - "Infrastructure remediation required"
+      related_docs:
+        - "docs/kb/10_runtime_contracts/budgets_timeouts.md#wall-clock-timeout"
+
+    - code: "selector_not_found"
+      summary: "Selector matched zero elements"
+      likely_causes:
+        - "UI changed"
+        - "Element not yet rendered"
+        - "Hidden element"
+      evidence_keys:
+        - "selector_used"
+        - "ui.selector_attempts"
+      first_fixes:
+        - "Inspect debug HTML"
+        - "Try alternative selector"
+      escalation:
+        - "Update selector hierarchy"
+      related_docs:
+        - "docs/kb/30_patterns/selectors.md#priority-hierarchy"
+
+    - code: "blocked_interstitial_captcha"
+      summary: "bot challenge/interstitial detected"
+      likely_causes:
+        - "Bot challenge"
+        - "Region/IP fingerprint"
+        - "Intervention mode-policy mismatch"
+      evidence_keys:
+        - "scenario_last_error.json.blocked_interstitial"
+        - "context/runtime_context.json.human_intervention_mode"
+      first_fixes:
+        - "Confirm interstitial artifacts"
+        - "Use `assist` mode for challenge-only handoff"
+        - "Use `demo` mode for full manual exploratory run"
+        - "Skip extraction (expected) while still blocked"
+      escalation:
+        - "Mitigation policy or false-positive detector review"
+        - "Manual-control handoff flow review"
+      related_docs:
+        - "docs/kb/20_decision_system/runtime_playbook.md"
+
+    - code: "google_route_context_unbound"
+      summary: "Route context unbound; extraction skipped"
+      likely_causes:
+        - "Date fill failure"
+        - "Route binding false"
+        - "Scope guard blocked"
+      evidence_keys:
+        - "route_state_<service>.json.route_bind_verdict"
+        - "scenario_extract_verdict.reason"
+      first_fixes:
+        - "Inspect route_state and scenario_return_summary"
+        - "Fix route/date fill flow"
+      escalation:
+        - "Guard false-positive investigation"
+      related_docs:
+        - "docs/kb/10_runtime_contracts/runtime_contracts.md#scenario-to-extraction-guard-contract"
+
+workflows:
+  agent_steps:
+    - "Extract StepResult.reason code"
+    - "Load reason metadata and evidence fields"
+    - "Match evidence to likely causes"
+    - "Apply first fixes if budget allows"
+    - "Escalate if exhausted"
+  human_steps:
+    - "Run utils.triage"
+    - "Filter by reason and show evidence"
+    - "Inspect debug HTML and artifacts"
+    - "Apply bounded fixes"
+    - "Re-run triage and document new patterns"
+
+escalation:
+  stage1_exhausted:
+    - "All first fixes attempted"
+    - "Evidence collected but pattern unclear"
+    - "Failure repeats across >5 runs"
+  stage2_requires:
+    - "Selector learning via VLM"
+    - "Refactoring step logic"
+    - "Infra/network optimization"
+  escalate_if:
+    - "selector_not_found repeats >3x for same selector"
+    - "calendar_dialog_not_found (legacy: calendar_not_open) with attempts >= 5"
+    - "wall_clock_timeout (legacy: timeout_error) persists after override"
+
+kb_cards_smoke_check:
+  commands:
+    default: "python -m utils.kb_cards --check --cards-root docs/kb/cards"
+    strict: "python -m utils.kb_cards --check --cards-root docs/kb/cards --strict"
+  validations:
+    - "Required fields present (site, reason_code, title, actions_allowed, evidence_required)"
+    - "KB links exist and anchors resolve"
+    - "No duplicate IDs or (site, reason_code, title)"
+  exit_codes:
+    ok: 0
+    strict_fail: 1
+
+quick_commands:
+  - "python -m utils.triage"
+  - "python -m utils.triage --reason <reason> --show-evidence"
+  - "python -m utils.triage --json --lookback <hours>"
+  - "python -m utils.kb_cards --check --cards-root docs/kb/cards"
+
+calendar_snapshots:
+  description: "Deterministic compact snapshot captured on calendar failures"
+  path: "storage/runs/<run_id>/artifacts/calendar_snapshot_<role>_<timestamp>.json"
+  fields:
+    - "html_fragment"
+    - "month_header_texts"
+    - "month_parse"
+    - "selector_attempts"
+    - "failure_stage"
+  enable_md_output:
+    config_key: "calendar_snapshot_write_md"
+    default: false
+
+references:
+  - "docs/kb/10_runtime_contracts/evidence.md"
+  - "docs/kb/10_runtime_contracts/budgets_timeouts.md"
+  - "docs/kb/30_patterns/date_picker.md"
+  - "docs/kb/30_patterns/combobox_commit.md"
+  - "docs/kb/30_patterns/selectors.md"
+  - "docs/kb/20_decision_system/runtime_playbook.md"
+  - "core/scenario/reasons.py"

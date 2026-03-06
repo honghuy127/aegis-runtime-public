@@ -1,0 +1,235 @@
+# Runtime Symptom Map
+# Machine-readable playbook by symptom and log reason
+# See: runtime_playbook.md for navigation index
+
+version: "1.0"
+last_updated: "2026-03-06"
+
+purpose: "Troubleshooting guide organized by symptoms, log reasons, and evidence fields."
+usage_steps:
+  - "Find symptom"
+  - "Check log patterns and reason codes"
+  - "Inspect evidence fields"
+  - "Correlate with budgets/timeouts"
+  - "Apply bounded fix"
+
+symptoms:
+  no_html_returned:
+    log_patterns:
+      - "scenario.last_html.initialize source=initial_page_load html_len=0"
+      - "scenario.return.no_html_captured"
+    diagnosis:
+      - "Page failed to load"
+      - "Network timeout before content"
+      - "bot challenge/blocked interstitial"
+    evidence_keys: []
+    actions:
+      - "Verify URL accessibility"
+      - "Review goto timeout in thresholds.yaml"
+      - "Enable human_mimic"
+      - "Inspect screenshot/HTML artifacts"
+
+  blocked_interstitial_captcha:
+    log_patterns:
+      - "scenario.attempt.blocked_interstitial reason=blocked_interstitial_captcha"
+      - "scenario.span ... scope_class=interstitial"
+      - "manual_intervention.start mode="
+    diagnosis:
+      - "bot challenge interstitial, not actionable"
+      - "challenge control handoff policy mismatch"
+    evidence_keys:
+      - "scenario_last_error.json.stage"
+      - "blocked_interstitial.evidence.ui.token_hits"
+      - "context/runtime_context.json.human_intervention_mode"
+      - "blocked_interstitial.grace_probe.manual_intervention.reason"
+    actions:
+      - "Confirm interstitial artifacts"
+      - "Verify intervention mode (`off|assist|demo`) and expected behavior"
+      - "Treat as non-actionable (scenario_guard) when challenge persists"
+      - "In assist mode, preserve full human control until challenge clears"
+      - "In demo mode, keep machine as observer/logger only"
+
+  date_picker_failed:
+    reasons:
+      - "calendar_dialog_not_found"
+      - "calendar_not_open"  # legacy alias
+      - "budget_hit"
+      - "month_nav_exhausted"
+      - "calendar_day_not_found"
+      - "day_not_found"  # legacy alias
+      - "date_picker_unverified"
+      - "verify_mismatch"  # legacy alias
+      - "route_core_before_date_fill_unverified"
+    evidence_keys:
+      - "ui.selector_attempts"
+      - "budget.stage"
+      - "calendar.nav_steps"
+      - "calendar.day"
+      - "verify.verified_value"
+    actions:
+      - "Check date opener selectors"
+      - "Confirm target date within nav window"
+      - "Add day selector variants"
+      - "Verify date format expectations"
+      - "If route-core unverified, debug route fill before date"
+
+  combobox_commit_failed:
+    log_patterns:
+      - "gf.fill.commit.*"
+      - "gf.fill.combobox.*"
+    diagnosis:
+      - "Suggestion list missing"
+      - "Wrong suggestion committed"
+      - "Verification mismatch"
+      - "Ambiguous input selector"
+    evidence_keys:
+      - "suggest.commit_strategy"
+      - "suggest.suggestion_rank"
+      - "verify.verified_value"
+      - "combobox.failure_stage"
+    actions:
+      - "Inspect combobox probe artifacts"
+      - "Prefer field-specific selectors"
+      - "Use bounded keyboard fallback"
+
+  wall_clock_timeout:
+    log_patterns:
+      - "scenario.step.timeout_hit"
+      - "scenario.deadline.exceeded"
+    diagnosis:
+      - "Wall-clock timeout exceeded"
+      - "Network/infra latency"
+    evidence_keys:
+      - "time.deadline_ms"
+      - "time.remaining_ms"
+    actions:
+      - "Review wall-clock caps"
+      - "Check infra latency"
+      - "Avoid unbounded retries"
+
+  timeout_error:
+    log_patterns:
+      - "scenario.step.timeout_hit"
+      - "scenario.deadline.exceeded"
+    diagnosis:
+      - "Legacy alias for wall_clock_timeout"
+    actions:
+      - "Use wall_clock_timeout for canonical diagnosis"
+
+  extraction_failed:
+    log_patterns:
+      - "extractor.plugin.rejected reason=malformed"
+      - "extractor.heuristic.no_candidate"
+      - "extractor.llm.invalid_json"
+      - "extractor.vlm.invalid_schema"
+    diagnosis:
+      - "Plugin output malformed"
+      - "No price candidates"
+      - "LLM/VLM invalid output"
+    actions:
+      - "Inspect plugin output schema"
+      - "Check HTML for price candidates"
+      - "Review LLM prompt/validator"
+
+  extraction_skipped_scenario_guard:
+    log_patterns:
+      - "Extraction skipped by scenario_guard"
+    diagnosis:
+      - "Scenario already proved non-actionable"
+    evidence_keys:
+      - "route_state_<service>.json.route_bind_verdict"
+      - "scenario_extract_verdict.reason"
+    actions:
+      - "Debug route/date fill mismatch"
+      - "Do not override guard"
+
+  scope_conflict:
+    log_patterns:
+      - "scope.conflict.resolved"
+      - "scope.guard.block"
+      - "scope.override.vlm"
+    diagnosis:
+      - "Heuristic vs VLM conflict"
+      - "Override limit reached"
+    evidence_keys:
+      - "scope.scope_signal"
+      - "scope.confidence"
+    actions:
+      - "Validate scope tokens"
+      - "Check VLM page_kind accuracy"
+
+  vlm_not_called:
+    log_patterns:
+      - "vision.page_kind.skipped reason=cooldown"
+      - "vision.page_kind.circuit_open"
+    diagnosis:
+      - "Cooldown active or circuit breaker open"
+    actions:
+      - "Check cooldown thresholds"
+      - "Review circuit breaker reset"
+
+  vlm_invalid_response:
+    log_patterns:
+      - "vlm.payload_invalid"
+      - "vlm.response.malformed"
+    diagnosis:
+      - "Schema validation failure"
+      - "JSON parse error"
+    evidence_keys:
+      - "vlm.schema_valid"
+      - "vlm.payload_hash"
+    actions:
+      - "Review VLM prompt/schema"
+      - "Enable fallback extraction"
+
+  recovery_loop_detected:
+    log_patterns:
+      - "scenario.recovery.attempt count=3"
+    diagnosis:
+      - "Recovery loop (should be bounded)"
+    actions:
+      - "Verify recovery hard-gates"
+      - "Check action budget enforcement"
+
+  selector_spam:
+    log_patterns:
+      - "*_budget_hit"
+    diagnosis:
+      - "Too many selector attempts"
+    evidence_keys:
+      - "ui.selector_attempts"
+      - "action_budget_used"
+    actions:
+      - "Reduce selector count"
+      - "Prefer semantic selectors"
+
+  knowledge_store_drift:
+    log_patterns:
+      - "knowledge.selector.failed"
+    diagnosis:
+      - "Stale learned selector"
+      - "Locale mismatch"
+    actions:
+      - "Clear adaptive_policy.json"
+      - "Clear knowledge_store.json"
+      - "Clear plan_store.local.json only"
+
+  debug_run_folders:
+    description: "Debug mode creates per-run artifacts for postmortem analysis"
+    paths:
+      - "storage/runs/<run_id>/manifest.json"
+      - "storage/runs/<run_id>/run.log"
+      - "storage/runs/<run_id>/events.jsonl"
+      - "storage/runs/<run_id>/scenario_last_error.json"
+      - "storage/runs/<run_id>/artifacts/"
+    actions:
+      - "Inspect run.log and events.jsonl"
+      - "Open error HTML/PNG artifacts"
+
+references:
+  - "docs/kb/10_runtime_contracts/evidence.md"
+  - "docs/kb/10_runtime_contracts/budgets_timeouts.md"
+  - "docs/kb/30_patterns/date_picker.md"
+  - "docs/kb/30_patterns/combobox_commit.md"
+  - "docs/kb/30_patterns/selectors.md"
+  - "docs/kb/20_decision_system/triage_runbook.md"

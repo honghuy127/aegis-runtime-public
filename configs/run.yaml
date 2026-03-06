@@ -1,0 +1,187 @@
+# Default run input for `main.py`.
+# These values are used when the same field is not provided via CLI.
+# CLI always overrides this file.
+#
+# IATA airport code (3 letters), e.g. HND, NRT, ITM, KIX
+# Used for single-trip mode or as fallback defaults for each row in `trips`.
+origin: FUK
+# Destination IATA code
+dest: HND
+# Departure date in YYYY-MM-DD
+depart: 2026-05-02
+# Return date in YYYY-MM-DD (required for round_trip)
+return_date: 2026-06-08
+# one_way or round_trip
+trip_type: round_trip
+# true = prefer domestic-flight mode, false = prefer international mode.
+# Useful for websites that split domestic vs international search flows.
+is_domestic: true
+# Optional "buy threshold" for the entire trip.
+# If set (>0), this can trigger alert when price <= threshold.
+max_trip_price: 50000
+# Optional transit/stops cap.
+# - 0 = nonstop only
+# - 1 = up to 1 transit
+# - leave empty to disable this constraint
+max_transit:
+
+# Optional multi-trip mode (config-driven only).
+# If present and no trip CLI args are passed, main.py runs each item in order.
+# Missing fields in each item fallback to top-level defaults above.
+# trips:
+#   - origin: HND
+#     dest: ITM
+#     depart: 2026-03-01
+#     return_date: 2026-03-08
+#     trip_type: round_trip
+#     is_domestic: true
+#     max_trip_price: 50000
+#     max_transit:
+#   - origin: NRT
+#     dest: CTS
+#     depart: 2026-03-10
+#     return_date: 2026-03-15
+#     trip_type: round_trip
+#     is_domestic: true
+
+# Optional execution defaults
+#
+# Task label stored in DB. Keep as `price` unless you add new task types.
+task: price
+# If true, save final HTML per service into storage/last_<service>.html
+save_html: false
+# If true, also persist rolling debug HTML snapshots per service
+# under storage/debug_html/ (last_ok / last_error / scenario snapshots).
+debug_save_service_html: true
+# LLM profile:
+# - full: larger generation budget, better success on complex pages
+# - light: shorter generation, lower resource usage
+# Recommended on local Ollama for faster/reliable runs; full still available via CLI.
+llm_mode: light
+# If true, use slower human-like typing/click pacing in Playwright steps.
+# Useful for sites with stricter anti-bot behavior.
+human_mimic: true
+# Browser-region mimic defaults (Tokyo / GMT+9 / JPY).
+# These shape locale headers, timezone, and geolocation hints in browser context.
+mimic_locale: ja-JP
+mimic_timezone: Asia/Tokyo
+mimic_currency: JPY
+mimic_region: JP
+mimic_latitude: 35.6762
+mimic_longitude: 139.6503
+# Google Flights bootstrap policy:
+# - simple_only (default): always start from plain Google Flights page and fill UI deterministically
+# - simple_first: try simple page first, keep deeplink as fallback candidate
+# - deeplink_first: legacy/experimental behavior (deeplink first)
+google_flights_bootstrap_mode: simple_only
+# Knowledge namespace key for shared learning DB.
+# Use email or GitHub ID so multiple users can share one knowledge_store.json safely.
+# If omitted, runtime falls back to env vars:
+# FLIGHT_WATCHER_USER -> USER_EMAIL -> GITHUB_USER -> GITHUB_ACTOR -> public
+knowledge_user: public
+# If true, skip alert sending for this run
+disable_alerts: false
+
+# KB Cards Configuration
+# If true, enable KB Cards loader for triage integration (gated, off by default)
+# When false (default), KB Cards are not loaded and triage flow is unchanged.
+# This flag can be enabled in Step 4 when triage integration is ready.
+kb_cards_enabled: false
+
+# Calendar Adapter Configuration (Step 6.8.1)
+# Controls behavior of robust calendar date-setting with month parsing and verification.
+#
+# If true, enable selector scoring system that learns which selectors work within a run
+# and ranks them for subsequent attempts (evidence-driven selector ranking).
+calendar_selector_scoring_enabled: true
+# If true, enable post-commit verification that checks the date field after setting
+# to confirm the target date was actually committed (prevents false "success").
+calendar_verify_after_commit: true
+# Parsing utility version: "new" (parse_month_year utility) or "legacy" (old regex).
+# New utility handles Japanese (2026年3月), English (March 2026), numeric (2026-03) formats.
+calendar_parsing_utility: "new"
+
+# Calendar Snapshot Configuration (Step 6.8.2)
+# Captures deterministic artifacts when calendar operations fail, for KB authoring & self-healing.
+#
+# If true, capture calendar state snapshots (HTML fragment, selectors, metadata) on failures.
+# Cost: cheap (only on failures); minimal disk usage (typically < 50 KB per snapshot).
+calendar_snapshot_on_failure: true
+# If true, also write .md file alongside JSON for human-readable summary + KB card draft.
+# Recommended for KB authoring workflows (review snapshots, author KB cards).
+# Cost: negligible (only written if enabled, parsed on demand).
+calendar_snapshot_write_md: false
+# Max HTML fragment size to capture (in characters). Enforced truncation prevents large artifacts.
+# Typical calendar HTML: 5-20 KB; setting 120000 allows headroom. Change if snapshots too large.
+calendar_snapshot_max_chars: 120000
+
+
+# UI Driver Configuration
+# Controls which UI driver is active for each site (agent vs legacy).
+# Agent driver is preferred default for modern agentic flows.
+# Legacy remains available as fallback for compatibility.
+#
+# ui_driver_mode selects the default driver mode:
+#   - "agent": Prefer agent framework (GoogleFlightsPlugin + AgentEngine)
+#   - "legacy": Use legacy scenario module (core/scenario_runner/ and core/scenario/gf_helpers/)
+ui_driver_mode: agent
+
+# Per-site overrides to force a specific UI driver mode for that site only.
+# Example to force legacy for one site:
+#   ui_driver_overrides:
+#     google_flights: legacy
+# Overrides take precedence over ui_driver_mode.
+ui_driver_overrides: {}
+
+# If true (default), fallback to legacy UI driver if agent fails at bind time.
+# If false, raise clear error when agent unavailable instead of silently falling back.
+# Useful for testing agent robustness.
+ui_driver_fallback_to_legacy: true
+
+# Tier 2 Lite: Auto-Heal Sandbox
+# Debug-only gated workflow: after debug run, triage logs + propose bounded patch.
+# Off by default; does not affect normal runtime.
+auto_heal_enabled: false
+# If true, apply patch to sandbox copy. If false (default), dry-run only.
+auto_heal_apply_patch: false
+# Max files to touch in single patch attempt
+auto_heal_max_files: 2
+# Max lines changed across all files
+auto_heal_max_changed_lines: 80
+# Test command to run after patch (if apply_patch is true)
+auto_heal_test_cmd: "pytest -q tests/test_triage.py tests/test_failure_reasons.py"
+# If true, use LLM to generate patch proposals. If false, heuristic skeleton only.
+auto_heal_llm_enabled: false
+# Threshold Profiles
+# Select which threshold profile to use: 'default' or 'debug'.
+# 'debug' applies modest boosts to retries, turns, and timeouts for deeper troubleshooting.
+# Override at runtime: use --debug flag to automatically select debug profile.
+thresholds_profile: default
+
+# Adaptive Escalation Policy
+# When enabled, system detects "stuckness" signals (repeated reasons, soft fails, etc.)
+# and recommends escalating to debug profile for next run.
+# Does not auto-rerun; only records decision in storage/runs/<run_id>/escalation.json
+adaptive_escalation_enabled: true
+# How many times a reason code must repeat to trigger escalation (e.g., month_nav_exhausted)
+escalation_reason_repeat_threshold: 2
+# How many soft failures within one run to trigger escalation (suggests retry loop)
+escalation_soft_fail_threshold: 3
+# How many turns without progress (ready=False) to trigger escalation
+escalation_max_turns_without_ready: 2
+# How many route_fill_mismatch errors to trigger escalation
+escalation_route_fill_mismatch_threshold: 2
+# Detect calendar navigation loop (both calendar_not_open and month_nav_exhausted occur)
+escalation_calendar_loop_detection: true
+# Graph-lite Policy Stats
+# Experimental feature for tracking state transitions and selector performance.
+# OFF by default. When enabled, captures per-run transition records to support
+# future bounded exploration and selector/strategy ordering improvements.
+# No runtime behavior change when disabled; minimal overhead when enabled.
+#
+# If true, collect graph policy stats during scenario execution
+graph_policy_stats_enabled: false
+# If true, append to global stats file (cross-run aggregation)
+graph_policy_stats_global_enabled: false
+# Global stats file path (only used if graph_policy_stats_global_enabled is true)
+graph_policy_stats_global_path: storage/graph_policy_stats_global.json

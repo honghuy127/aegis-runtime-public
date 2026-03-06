@@ -1,0 +1,41 @@
+version: '1.0'
+last_updated: '2026-02-26'
+artifacts:
+  scenario_last_error:
+    filename: storage/runs/<run_id>/scenario_last_error.json
+    description: Scenario-level failure snapshot for blocked interstitials
+  route_state:
+    filename: storage/runs/<run_id>/route_state_<service>.json
+    description: Route/scope bind verdict and scenario extract verdict
+  route_fill_selector_probes:
+    filenames:
+    - storage/runs/<run_id>/artifacts/google_route_fill_origin_pre_combobox_selector_probe.json
+    - storage/runs/<run_id>/artifacts/google_route_fill_origin_post_combobox_selector_probe.json
+    - storage/runs/<run_id>/artifacts/google_route_fill_origin_combobox_failed_selector_probe.json
+    description: Bounded route-field selector probe artifacts
+  date_open_selector_probes:
+    filenames:
+    - storage/runs/<run_id>/artifacts/google_date_fill_depart_pre_open_selector_probe.json
+    - storage/runs/<run_id>/artifacts/google_date_fill_depart_post_open_selector_probe.json
+    - storage/runs/<run_id>/artifacts/google_date_fill_depart_failed_selector_probe.json
+    description: Bounded date opener selector probe artifacts
+  search_commit_probes:
+    filenames:
+    - storage/runs/<run_id>/artifacts/google_search_commit_execute_plan_step_<n>_probe.json
+    - storage/runs/<run_id>/artifacts/google_search_commit_post_fill_turn_commit_probe.json
+    description: Search commit transition probes
+guidelines:
+  include:
+  - Machine-readable reason codes
+  - Diagnostic context (stage, role, step index)
+  - Quantitative metrics (elapsed_ms, counts, ranks)
+  - Selector information (selectors tried, selector_used)
+  - Verification values (verified/expected)
+  exclude:
+  - Full HTML or screenshots
+  - Secrets, tokens, or PII
+  - Full payloads (use hashes only)
+  - Large artifacts (use bounded probes)
+  naming_conventions:
+  - Use *_count, *_ms, *_hash suffixes
+  - Prefer namespaced keys (calendar.*, verify.*, combobox.*)

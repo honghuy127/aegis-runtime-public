@@ -1,0 +1,66 @@
+# Knowledge rule config for `storage/knowledge_store.py`.
+#
+# Purpose:
+# - Move string-token heuristics out of Python so behavior is easier to tune.
+# - Keep storage schema and counters stable while allowing rule updates by config.
+#
+# Format:
+# - One key per line: `key: comma,separated,values`
+# - Order matters for `failure_reason_*` keys (first match wins).
+
+# Detect domestic/international mode selectors and URL hints.
+domestic_tokens: domestic,国内
+international_tokens: international,intl,海外,国際
+url_domestic_tokens: domestic,kokunai,japan.html,air/domestic,国内
+url_international_tokens: international,intl,kaigai,overseas,air/_.html,kaigai_package,海外,国際
+url_package_tokens: kokunai-trip,dynamicpackage,airhotel,flight-hotel,/package/,/kaigai_package/,航空券+ホテル,航空券＋ホテル,ダイナミックパッケージ
+page_package_tokens: ダイナミックパッケージ,航空券+ホテル,航空券＋ホテル,flight + hotel,flight+hotel,air + hotel,air+hotel
+
+# i18n fallback tokens for placeholder/action/tab matching.
+# Keep these short and conservative; matching is case-insensitive for ASCII tokens.
+placeholder_dest_tokens: 目的地を探索,Explore destinations,Where to,To,Destination,目的地
+placeholder_origin_tokens: Where from,From,Origin,出発地,出発
+region_like_origin_tokens: 東京都,東京,Tokyo,Japan,日本
+action_search_tokens: 検索,Search,Search flights
+action_done_tokens: 完了,Done,OK
+action_reset_tokens: リセット,消去,Reset,Clear
+tab_flights_tokens: フライト,航空券,Flights,Flight,Air
+tab_hotels_tokens: ホテル,Hotels,Hotel
+
+# Detect selectors likely used for search submission.
+search_submit_tokens: search,submit,検索,空席照会
+
+# Detect selectors likely used for cookie/consent/modal handling.
+modal_control_tokens: cookie,consent,close,dismiss,accept,同意,閉じる,許可
+
+# Infer flight form field role from selector text.
+fill_role_origin_tokens: origin,from,where from,departureairport,outwarddeparture,出発地,出発空港
+fill_role_dest_tokens: destination,arrival,where to,to,outwardarrival,目的地,到着地,到着空港
+fill_role_depart_tokens: depart,departure,departdate,出発日,往路
+fill_role_return_tokens: return,returndate,復路,帰り,帰路
+
+# Semantic grouped token registry (new):
+# - Used by `utils.knowledge_rules.get_tokens(group, key)`.
+# - Keep these aligned with legacy flat keys above for backward compatibility.
+tokens:
+  page:
+    hotel: ["hotel", "hotels", "ホテル", "宿"]
+    flight: ["flight", "flights", "air", "航空券", "飛行機"]
+    package: ["ダイナミックパッケージ", "航空券+ホテル", "航空券＋ホテル", "flight + hotel", "flight+hotel", "air + hotel", "air+hotel"]
+  hints:
+    auth: ["email", "password", "login", "register", "account", "member", "メール", "会員", "ログイン", "パスワード", "氏名", "お名前", "電話"]
+    results: ["flight", "flights", "itinerary", "result", "results", "search result", "運賃", "料金", "便", "検索結果", "最安", "往路", "復路"]
+    route_fields: ["from", "to", "where from", "where to", "origin", "destination", "depart", "departure", "return", "出発地", "目的地", "到着地", "出発", "復路", "帰り"]
+  google:
+    non_flight_map: ["地図を表示", "リストを表示", "地図データ", "gmp-internal-camera-control", "map data"]
+    non_flight_hotel: ["hotel", "hotels", "ホテル", "宿泊", "check-in", "check out", "チェックイン"]
+    bundle_word: ["package", "パッケージ"]
+
+# Map runtime error text to failure categories used by knowledge.
+failure_reason_hidden_input: input of type "hidden" cannot be filled,type "hidden"
+failure_reason_auth_field: auth/profile fill selectors
+failure_reason_semantic_fill_mismatch: semantic fill mismatches
+failure_reason_timeout: timeout,readtimeout
+failure_reason_scope_guard_non_flight: scope_guard_non_flight,scope_non_flight,html_non_flight_scope,vlm_non_flight_scope
+failure_reason_repair_failed_no_dom_change: no dom change and plan repair failed
+failure_reason_followup_plan_failed: unable to produce follow-up plan

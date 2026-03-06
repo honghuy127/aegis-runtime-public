@@ -1,0 +1,25 @@
+# Service selection config for `main.py`.
+#
+# Comma-separated list of service keys to run in one execution.
+# Supported keys:
+# - google_flights
+# - skyscanner
+# Example:
+enabled_services: google_flights
+# Skyscanner support is retained in code but disabled by default.
+# Enable only with explicit operator intent and ToS-compliant rate limiting.
+
+# Optional URL overrides per service.
+# Enter one root URL per service.
+# Agents will learn better entry URLs over time and persist them in knowledge store.
+# Optional *_url_hints fields below can bootstrap learning with known good paths.
+google_flights_url: https://www.google.com/travel/flights
+skyscanner_url: https://www.skyscanner.com/flights
+
+# Optional bootstrap URL hints (comma-separated), generalized for all services:
+# <service>_url_hints: ...
+# <service>_domestic_url_hints: ...
+# <service>_international_url_hints: ...
+# <service>_package_url_hints: ...   # bundled flight+hotel flows to de-prioritize
+#
+skyscanner_url_hints: https://www.skyscanner.com/flights,https://www.skyscanner.net/flights,https://www.skyscanner.jp/flights/

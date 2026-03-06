@@ -1,0 +1,611 @@
+{
+  "default": {
+    "product_toggle_labels": {
+      "en": [
+        "Flights",
+        "Flight",
+        "Air"
+      ],
+      "ja": [
+        "フライト",
+        "航空券"
+      ]
+    },
+    "mode_toggle_labels": {
+      "domestic": {
+        "en": [
+          "Domestic"
+        ],
+        "ja": [
+          "国内"
+        ]
+      },
+      "international": {
+        "en": [
+          "International"
+        ],
+        "ja": [
+          "海外",
+          "国際"
+        ]
+      }
+    }
+  },
+  "google_flights": {
+    "search_selectors": [
+      "[role='button']:has-text('検索')",
+      "button:has-text('検索')",
+      "[role='button'][aria-label*='検索']",
+      "button[aria-label*='検索']",
+      "[role='button']:has-text('Search')",
+      "button:has-text('Search')",
+      "[role='button'][aria-label*='Search']",
+      "button[aria-label*='Search']",
+      "button[type='submit']",
+      "input[type='submit']"
+    ],
+    "wait_selectors": [
+      "[role='main']",
+      "main",
+      "[aria-live]",
+      "body"
+    ],
+    "route_reset_selectors": {
+      "en": [
+        "button[aria-label*='Clear']",
+        "button[aria-label*='clear']",
+        "button[type='reset']"
+      ],
+      "ja": [
+        "button[aria-label*='リセット']",
+        "button[aria-label*='消去']"
+      ]
+    },
+    "date_done_selectors": {
+      "en": [
+        "button:has-text('Done')",
+        "[role='button']:has-text('Done')",
+        "button[aria-label*='Done']"
+      ],
+      "ja": [
+        "button:has-text('完了')",
+        "[role='button']:has-text('完了')",
+        "button[aria-label*='完了']"
+      ]
+    },
+    "force_bind_dest_selectors": {
+      "en": [
+        "[role='combobox'][aria-label='Where to?']",
+        "[role='combobox'][aria-label^='Where to?']",
+        "[role='button'][aria-label='Where to?']",
+        "[role='combobox'][aria-label*='Destination']",
+        "[role='button'][aria-label*='Destination']",
+        "input[aria-label*='Destination']",
+        "[role='combobox'][aria-label*='To']",
+        "[role='button'][aria-label*='To']"
+      ],
+      "ja": [
+        "[role='combobox'][aria-label*='目的地']",
+        "[role='button'][aria-label*='目的地']",
+        "[role='combobox'][aria-label*='到着地']",
+        "[role='button'][aria-label*='到着地']",
+        "input[aria-label*='目的地']",
+        "input[aria-label*='到着地']"
+      ]
+    },
+    "force_bind_flights_tab_selectors": {
+      "en": [
+        "[role='tab'][aria-label*='Flights']",
+        "[role='tab']:has-text('Flights')",
+        "a[href*='/travel/flights']"
+      ],
+      "ja": [
+        "[role='tab'][aria-label*='フライト']",
+        "[role='tab']:has-text('フライト')",
+        "a[href*='/travel/flights']"
+      ]
+    },
+    "force_bind_location_input_selectors": {
+      "origin": {
+        "en": [
+          "input[role='combobox'][aria-label='Where from?']",
+          "input[role='combobox'][aria-label^='Where from?']",
+          "[role='combobox'][aria-label*='From'] input",
+          "input[aria-label*='From']",
+          "input[aria-label^='Where from?']",
+          "input[placeholder*='Where from']"
+        ],
+        "ja": [
+          "[role='combobox'][aria-label*='出発地'] input",
+          "input[aria-label*='出発地']",
+          "input[placeholder*='出発地']"
+        ]
+      },
+      "dest": {
+        "en": [
+          "input[role='combobox'][aria-label='Where to?']",
+          "input[role='combobox'][aria-label^='Where to?']",
+          "[role='combobox'][aria-label^='Where to?'] input",
+          "[role='combobox'][aria-label*='Destination'] input",
+          "[role='combobox'][aria-label*='To'] input",
+          "input[aria-label*='Destination']",
+          "input[aria-label^='Where to?']",
+          "input[placeholder*='Where to']"
+        ],
+        "ja": [
+          "[role='combobox'][aria-label*='目的地'] input",
+          "[role='combobox'][aria-label*='到着地'] input",
+          "input[aria-label*='目的地']",
+          "input[placeholder*='目的地']"
+        ]
+      }
+    },
+    "active_textbox_selectors": {
+      "origin": {
+        "en": [
+          "input[aria-autocomplete='list']",
+          "input[aria-controls]",
+          "input[role='combobox']",
+          "[role='combobox'] input[type='text']",
+          "input[type='text']"
+        ]
+      },
+      "dest": {
+        "en": [
+          "input[aria-autocomplete='list']",
+          "input[aria-controls]",
+          "input[role='combobox']",
+          "[role='combobox'] input[type='text']",
+          "input[type='text']"
+        ]
+      }
+    },
+    "suggestion_list_selectors": [
+      "[role='listbox']",
+      "[role='menu']",
+      "ul[role='listbox']"
+    ],
+    "suggestion_option_selectors": [
+      "[role='listbox'] [role='option']",
+      "[role='menu'] [role='menuitem']",
+      "[role='option']",
+      "[role='menuitem']"
+    ],
+    "date_chip_activation_keywords": {
+      "depart": {
+        "en": [
+          "Departure date",
+          "Departure",
+          "Depart",
+          "Outbound"
+        ],
+        "ja": [
+          "出発日",
+          "往路"
+        ]
+      },
+      "return": {
+        "en": [
+          "Return date",
+          "Return",
+          "Inbound"
+        ],
+        "ja": [
+          "復路",
+          "帰り",
+          "帰路",
+          "復路出発日"
+        ]
+      }
+    },
+    "route_form_activation_keywords": {
+      "origin": {
+        "en": [
+          "Where from?",
+          "Where from",
+          "From",
+          "Origin",
+          "Departure airport"
+        ],
+        "ja": [
+          "出発地",
+          "出発空港"
+        ]
+      },
+      "dest": {
+        "en": [
+          "Where to?",
+          "Where to",
+          "To",
+          "Destination",
+          "Arrival airport"
+        ],
+        "ja": [
+          "目的地",
+          "到着地",
+          "到着空港"
+        ]
+      }
+    },
+    "route_form_fallback_button_labels": {
+      "en": [
+        "Flights",
+        "Explore"
+      ],
+      "ja": [
+        "フライト"
+      ]
+    },
+    "force_bind_suggestion_option_selectors": [
+      ":nth-match([role='option'], 1)",
+      ":nth-match([role='menuitem'], 1)",
+      ":nth-match(li[role='option'], 1)"
+    ],
+    "product_toggle_selectors": {
+      "en": [
+        "button:has-text('Flights')",
+        "button:has-text('Flight')",
+        "[aria-label*='Flights']",
+        "[aria-label*='Flight']",
+        "a[href*='/travel/flights']",
+        "text=Flights",
+        "text=Flight"
+      ],
+      "ja": [
+        "button:has-text('フライト')",
+        "button:has-text('航空券')",
+        "[aria-label*='フライト']",
+        "[aria-label*='航空券']",
+        "a[href*='/travel/flights']",
+        "text=フライト",
+        "text=航空券"
+      ]
+    },
+    "mode_toggle_selectors": {
+      "domestic": {
+        "en": [
+          "text=Domestic",
+          "button:has-text('Domestic')",
+          "[aria-label*='Domestic']"
+        ],
+        "ja": [
+          "text=国内",
+          "button:has-text('国内')",
+          "[aria-label*='国内']"
+        ]
+      },
+      "international": {
+        "en": [
+          "text=International",
+          "button:has-text('International')",
+          "[aria-label*='International']"
+        ],
+        "ja": [
+          "text=海外",
+          "text=国際",
+          "button:has-text('海外')",
+          "button:has-text('国際')",
+          "[aria-label*='海外']",
+          "[aria-label*='国際']"
+        ]
+      }
+    },
+    "activation_clicks": {
+      "origin": {
+        "en": [
+          "[role='combobox'][aria-label*='From']",
+          "[role='button'][aria-label*='From']",
+          "input[placeholder*='Where from']",
+          "input[aria-label*='Where from']"
+        ],
+        "ja": [
+          "[role='combobox'][aria-label*='出発地']",
+          "[role='button'][aria-label*='出発地']",
+          "input[placeholder*='出発地']",
+          "input[aria-label*='出発地']"
+        ]
+      },
+      "dest": {
+        "en": [
+          "[role='combobox'][aria-label*='To']",
+          "[role='button'][aria-label*='To']",
+          "input[placeholder*='Where to']",
+          "input[aria-label*='Where to']"
+        ],
+        "ja": [
+          "[role='combobox'][aria-label*='目的地']",
+          "[role='button'][aria-label*='目的地']",
+          "[role='combobox'][aria-label*='到着地']",
+          "[role='button'][aria-label*='到着地']",
+          "input[placeholder*='目的地']",
+          "input[aria-label*='目的地']"
+        ]
+      },
+      "depart": {
+        "en": [
+          "[role='combobox'][aria-label*='Depart']",
+          "[role='button'][aria-label*='Depart']",
+          "input[placeholder*='Departure']",
+          "input[aria-label*='Departure']",
+          "button:has-text('Depart')",
+          "text=Depart"
+        ],
+        "ja": [
+          "[role='button'][aria-label*='出発日']",
+          "input[placeholder*='出発日']",
+          "input[aria-label*='出発日']",
+          "button:has-text('出発日')",
+          "text=出発日"
+        ]
+      },
+      "return": {
+        "en": [
+          "[role='combobox'][aria-label*='Return']",
+          "[role='button'][aria-label*='Return']",
+          "input[placeholder*='Return']",
+          "input[aria-label*='Return']",
+          "button:has-text('Return')",
+          "text=Return"
+        ],
+        "ja": [
+          "[role='button'][aria-label*='復路']",
+          "input[placeholder*='復路']",
+          "input[aria-label*='復路']",
+          "button:has-text('復路')",
+          "text=復路"
+        ]
+      }
+    },
+    "semantic_role_tokens": {
+      "origin": {
+        "selector_ja": ["出発地", "出発", "出発空港"],
+        "selector_en": ["Where from", "From", "Origin", "Departure airport"],
+        "keyword_ja": ["出発", "出発地", "出発空港"],
+        "keyword_en": ["from", "where from", "origin", "departure"],
+        "legacy_bare_text": ["From", "出発"]
+      },
+      "dest": {
+        "selector_ja": ["目的地", "到着地", "到着", "到着空港"],
+        "selector_en": ["Where to", "To", "Destination", "Arrival airport"],
+        "keyword_ja": ["目的地", "到着", "到着地", "到着空港"],
+        "keyword_en": ["to", "where to", "destination", "arrival"],
+        "legacy_bare_text": ["To", "目的地"]
+      },
+      "depart": {
+        "selector_ja": ["出発日", "往路"],
+        "selector_en": ["Depart", "Departure date", "Outbound"],
+        "keyword_ja": ["出発日", "往路"],
+        "keyword_en": ["depart", "departure", "departure date", "outbound"],
+        "legacy_bare_text": ["Depart", "出発日"]
+      },
+      "return": {
+        "selector_ja": ["復路", "復路出発日", "帰り", "帰路"],
+        "selector_en": ["Return", "Return date", "Inbound"],
+        "keyword_ja": ["復路", "帰り", "帰路"],
+        "keyword_en": ["return", "inbound", "return date"],
+        "legacy_bare_text": ["Return", "復路"]
+      }
+    },
+    "date_open_tokens": {
+      "depart": {
+        "role_tokens": {
+          "ja": ["出発日", "出発", "往路出発日", "往路"],
+          "en": ["Departure date", "Departure", "Depart", "Outbound"]
+        },
+        "route_date_prefix_tokens": {
+          "ja": ["往路出発日", "出発日"],
+          "en": ["Departure date", "Depart date", "Outbound date"]
+        }
+      },
+      "return": {
+        "role_tokens": {
+          "ja": ["復路", "復路出発日", "帰り", "帰路"],
+          "en": ["Return date", "Return", "Returning", "Inbound"]
+        },
+        "route_date_prefix_tokens": {
+          "ja": ["復路出発日", "復路"],
+          "en": ["Return date", "Returning date", "Inbound date"]
+        }
+      }
+    },
+    "date_opener_default_selectors": {
+      "depart": [
+        "[role='button'][aria-label*='Departure date']",
+        "[role='button'][aria-label*='Departure']",
+        "[role='button'][aria-label*='Outbound']",
+        "[role='button'][aria-label*='出発日']",
+        "[role='button'][aria-label*='往路出発日']",
+        "[role='combobox'][aria-label*='Departure']",
+        "[role='combobox'][aria-label*='Depart']",
+        "[role='combobox'][aria-label*='出発']",
+        "input[aria-label*='Departure']",
+        "input[placeholder*='Departure']",
+        "input[aria-label*='出発日']",
+        "input[placeholder*='出発日']",
+        "[aria-label*='Departure date']",
+        "[aria-label*='出発日']"
+      ],
+      "return": [
+        "[role='button'][aria-label*='Return date']",
+        "[role='button'][aria-label*='Return']",
+        "[role='button'][aria-label*='Inbound']",
+        "[role='button'][aria-label*='復路']",
+        "[role='button'][aria-label*='復路出発日']",
+        "[role='combobox'][aria-label*='Return']",
+        "[role='combobox'][aria-label*='復路']",
+        "input[aria-label*='Return']",
+        "input[placeholder*='Return']",
+        "input[aria-label*='復路']",
+        "input[placeholder*='復路']",
+        "[aria-label*='Return date']",
+        "[aria-label*='復路']"
+      ]
+    },
+    "calendar_close_button_tokens": {
+      "done": {
+        "ja": ["完了", "適用"],
+        "en": ["Done", "Apply"]
+      }
+    },
+    "calendar_month_header_exclusion_texts": {
+      "ja": ["完了", "閉じる", "適用", "キャンセル", "確定", "戻る", "次へ", "前へ", "OK"],
+      "en": ["Done", "Close", "Apply", "Cancel", "Confirm", "Back", "Next", "Previous", "OK"]
+    },
+    "calendar_month_year_aria_tokens": {
+      "month": {
+        "ja": ["月"],
+        "en": []
+      },
+      "year": {
+        "ja": ["年"],
+        "en": []
+      }
+    },
+    "date_field_verify_tokens": {
+      "depart": {
+        "ja": ["出発日", "出発", "往路"],
+        "en": ["Departure date", "Departure", "Depart", "Outbound"]
+      },
+      "return": {
+        "ja": ["復路", "帰り", "帰路", "復路出発日"],
+        "en": ["Return date", "Return", "Inbound"]
+      }
+    },
+    "location_field_fallback_tokens": {
+      "origin": {
+        "ja": ["出発"],
+        "en": ["From"]
+      },
+      "dest": {
+        "ja": ["目的地"],
+        "en": ["To"]
+      }
+    },
+    "calendar_loading_indicator_labels": {
+      "ja": ["結果を読み込んでいます"],
+      "en": ["Loading"]
+    },
+    "calendar_month_nav_button_labels": {
+      "next": {
+        "ja": ["次の月", "次"],
+        "en": ["Next", "next month"]
+      },
+      "prev": {
+        "ja": ["前の月", "前"],
+        "en": ["Previous", "previous month"]
+      }
+    },
+    "legacy_depart_done_button_tokens": {
+      "ja": ["完了"],
+      "en": ["Done"]
+    },
+    "date_opener_field_specific_scoring_tokens": {
+      "depart": {
+        "ja": ["出発日", "出発", "往路"],
+        "en": ["departure", "depart", "outbound"]
+      },
+      "return": {
+        "ja": ["復路", "帰り", "帰路"],
+        "en": ["return", "inbound"]
+      }
+    },
+    "date_token_filtering_rules": {
+      "skip_tokens_containing": {
+        "ja": ["月"],
+        "en": []
+      }
+    },
+    "field_token_keywords": {
+      "origin": {
+        "en": [
+          "Where from",
+          "From",
+          "Origin",
+          "Departure airport"
+        ],
+        "ja": [
+          "出発",
+          "出発地",
+          "出発空港"
+        ]
+      },
+      "dest": {
+        "en": [
+          "Where to",
+          "To",
+          "Destination",
+          "Arrival airport"
+        ],
+        "ja": [
+          "目的地",
+          "到着地",
+          "到着空港"
+        ]
+      }
+    }
+  },
+  "skyscanner": {
+    "search_labels": {
+      "en": [
+        "Search",
+        "Search flights"
+      ],
+      "ja": [
+        "検索"
+      ]
+    },
+    "search_selectors": [
+      "button[type='submit']",
+      "button[aria-label*='Search']",
+      "button[data-testid*='search']",
+      "input[type='submit']",
+      "text=Search",
+      "text=検索"
+    ],
+    "wait_selectors": [
+      "[data-testid*='search-results']",
+      "[data-testid*='itinerary']",
+      "[data-testid*='result']",
+      "[id*='result']",
+      "[role='main']",
+      "main",
+      "body"
+    ],
+    "product_toggle_selectors": {
+      "en": [
+        "button:has-text('Flights')",
+        "text=Flights"
+      ],
+      "ja": [
+        "button:has-text('フライト')",
+        "button:has-text('航空券')",
+        "text=フライト",
+        "text=航空券"
+      ]
+    },
+    "mode_toggle_selectors": {
+      "domestic": {
+        "en": [
+          "text=Domestic",
+          "button:has-text('Domestic')"
+        ],
+        "ja": [
+          "text=国内",
+          "button:has-text('国内')"
+        ]
+      },
+      "international": {
+        "en": [
+          "text=International",
+          "button:has-text('International')"
+        ],
+        "ja": [
+          "text=海外",
+          "text=国際",
+          "button:has-text('海外')",
+          "button:has-text('国際')"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# LLM models used by this project (read by llm/code_model.py).
+# Format: model_tag available in your local Ollama instance.
+# Check installed models with: `ollama list`
+#
+# planner:
+# - Used for browser action planning and plan repair in scenario runner.
+# - Prefer reliable reasoning model; can be larger/slower.
+planner: qwen3.5:4b
+# planner: qwen3.5:0.8b # For faster pytest
+#
+# coder:
+# - Used for HTML-to-price extraction task.
+# - Prefer model that returns clean JSON consistently.
+coder: qwen2.5-coder:7b
+# coder: qwen3.5:0.8b # For faster pytest
+#
+# vision:
+# - Used for screenshot-based extraction / UI assist (VLM).
+# - Must be a multimodal Ollama model.
+vision: qwen3.5:4b
+# vision: qwen3.5:0.8b # For faster pytest
+#
+# vision_light:
+# - Used for lightweight bot/captcha multiclass classification.
+# - Prefer a fast multimodal model for challenge typing and action hints.
+vision_light: qwen3.5:2b
+# vision_light: qwen3.5:0.8b # For faster pytest

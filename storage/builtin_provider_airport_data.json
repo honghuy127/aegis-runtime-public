@@ -1,0 +1,907 @@
+{
+  "provider_airport_code_map": {
+    "google_flights": {
+      "HND": "TYO",
+      "NRT": "TYO",
+      "ITM": "OSA",
+      "KIX": "OSA",
+      "UKB": "OSA",
+      "CTS": "SPK",
+      "OKD": "SPK",
+      "NKM": "NGO",
+      "ICN": "SEL",
+      "GMP": "SEL",
+      "PEK": "BJS",
+      "PKX": "BJS",
+      "PVG": "SHA",
+      "JFK": "NYC",
+      "LGA": "NYC",
+      "LHR": "LON",
+      "LGW": "LON",
+      "LCY": "LON",
+      "LTN": "LON",
+      "STN": "LON",
+      "SEN": "LON",
+      "CDG": "PAR",
+      "ORY": "PAR",
+      "MXP": "MIL",
+      "LIN": "MIL",
+      "BGY": "MIL",
+      "FCO": "ROM",
+      "CIA": "ROM",
+      "IAD": "WAS",
+      "DCA": "WAS",
+      "BWI": "WAS"
+    }
+  },
+  "provider_airport_alias_tokens": {
+    "google_flights": {
+      "TYO": {
+        "ja": [
+          "東京",
+          "東京圏"
+        ],
+        "en": [
+          "Tokyo",
+          "Tokyo Area"
+        ]
+      },
+      "HND": {
+        "ja": [
+          "羽田",
+          "東京国際空港",
+          "東京（羽田）"
+        ],
+        "en": [
+          "Haneda",
+          "Tokyo Haneda",
+          "Tokyo International Airport",
+          "Tokyo"
+        ]
+      },
+      "NRT": {
+        "ja": [
+          "成田",
+          "成田空港",
+          "東京（成田）"
+        ],
+        "en": [
+          "Narita",
+          "Tokyo Narita",
+          "Narita International Airport",
+          "Tokyo"
+        ]
+      },
+      "OSA": {
+        "ja": [
+          "大阪",
+          "大阪圏"
+        ],
+        "en": [
+          "Osaka",
+          "Osaka Area"
+        ]
+      },
+      "ITM": {
+        "ja": [
+          "伊丹",
+          "大阪国際空港",
+          "大阪（伊丹）"
+        ],
+        "en": [
+          "Itami",
+          "Osaka Itami",
+          "Osaka International Airport",
+          "Osaka"
+        ]
+      },
+      "KIX": {
+        "ja": [
+          "関空",
+          "関西",
+          "関西国際空港",
+          "大阪（関空）"
+        ],
+        "en": [
+          "Kansai",
+          "Kansai International Airport",
+          "Osaka Kansai",
+          "Osaka"
+        ]
+      },
+      "UKB": {
+        "ja": [
+          "神戸",
+          "神戸空港",
+          "大阪（神戸）"
+        ],
+        "en": [
+          "Kobe",
+          "Kobe Airport",
+          "Osaka Kobe",
+          "Osaka"
+        ]
+      },
+      "NGO": {
+        "ja": [
+          "名古屋",
+          "中部",
+          "中部国際空港",
+          "セントレア"
+        ],
+        "en": [
+          "Nagoya",
+          "Chubu",
+          "Chubu Centrair",
+          "Nagoya Chubu"
+        ]
+      },
+      "NKM": {
+        "ja": [
+          "名古屋小牧",
+          "小牧"
+        ],
+        "en": [
+          "Nagoya Komaki",
+          "Komaki",
+          "Nagoya"
+        ]
+      },
+      "SPK": {
+        "ja": [
+          "札幌",
+          "札幌圏"
+        ],
+        "en": [
+          "Sapporo",
+          "Sapporo Area"
+        ]
+      },
+      "CTS": {
+        "ja": [
+          "新千歳",
+          "千歳",
+          "札幌（新千歳）"
+        ],
+        "en": [
+          "New Chitose",
+          "Chitose",
+          "Sapporo New Chitose",
+          "Sapporo"
+        ]
+      },
+      "OKD": {
+        "ja": [
+          "丘珠",
+          "札幌丘珠"
+        ],
+        "en": [
+          "Okadama",
+          "Sapporo Okadama",
+          "Sapporo"
+        ]
+      },
+      "FUK": {
+        "ja": [
+          "福岡",
+          "福岡空港"
+        ],
+        "en": [
+          "Fukuoka",
+          "Fukuoka Airport"
+        ]
+      },
+      "OKA": {
+        "ja": [
+          "那覇",
+          "沖縄",
+          "沖縄（那覇）"
+        ],
+        "en": [
+          "Naha",
+          "Okinawa",
+          "Naha Airport"
+        ]
+      },
+      "SDJ": {
+        "ja": [
+          "仙台",
+          "仙台空港"
+        ],
+        "en": [
+          "Sendai",
+          "Sendai Airport"
+        ]
+      },
+      "HIJ": {
+        "ja": [
+          "広島",
+          "広島空港"
+        ],
+        "en": [
+          "Hiroshima",
+          "Hiroshima Airport"
+        ]
+      },
+      "KOJ": {
+        "ja": [
+          "鹿児島",
+          "鹿児島空港"
+        ],
+        "en": [
+          "Kagoshima",
+          "Kagoshima Airport"
+        ]
+      },
+      "KMI": {
+        "ja": [
+          "宮崎",
+          "宮崎空港"
+        ],
+        "en": [
+          "Miyazaki",
+          "Miyazaki Airport"
+        ]
+      },
+      "NGS": {
+        "ja": [
+          "長崎",
+          "長崎空港"
+        ],
+        "en": [
+          "Nagasaki",
+          "Nagasaki Airport"
+        ]
+      },
+      "OIT": {
+        "ja": [
+          "大分",
+          "大分空港"
+        ],
+        "en": [
+          "Oita",
+          "Oita Airport"
+        ]
+      },
+      "KMJ": {
+        "ja": [
+          "熊本",
+          "熊本空港"
+        ],
+        "en": [
+          "Kumamoto",
+          "Kumamoto Airport"
+        ]
+      },
+      "AXT": {
+        "ja": [
+          "秋田",
+          "秋田空港"
+        ],
+        "en": [
+          "Akita",
+          "Akita Airport"
+        ]
+      },
+      "HKD": {
+        "ja": [
+          "函館",
+          "函館空港"
+        ],
+        "en": [
+          "Hakodate",
+          "Hakodate Airport"
+        ]
+      },
+      "MMJ": {
+        "ja": [
+          "松本",
+          "信州まつもと"
+        ],
+        "en": [
+          "Matsumoto",
+          "Shinshu Matsumoto"
+        ]
+      },
+      "SEL": {
+        "ja": [
+          "ソウル",
+          "ソウル圏"
+        ],
+        "en": [
+          "Seoul",
+          "Seoul Area"
+        ]
+      },
+      "ICN": {
+        "ja": [
+          "仁川",
+          "ソウル（仁川）"
+        ],
+        "en": [
+          "Incheon",
+          "Seoul Incheon",
+          "Seoul"
+        ]
+      },
+      "GMP": {
+        "ja": [
+          "金浦",
+          "ソウル（金浦）"
+        ],
+        "en": [
+          "Gimpo",
+          "Seoul Gimpo",
+          "Seoul"
+        ]
+      },
+      "BJS": {
+        "ja": [
+          "北京",
+          "北京市"
+        ],
+        "en": [
+          "Beijing",
+          "Beijing City"
+        ]
+      },
+      "PEK": {
+        "ja": [
+          "北京首都",
+          "北京（首都）"
+        ],
+        "en": [
+          "Beijing Capital",
+          "Beijing PEK",
+          "Beijing"
+        ]
+      },
+      "PKX": {
+        "ja": [
+          "北京大興",
+          "北京（大興）"
+        ],
+        "en": [
+          "Beijing Daxing",
+          "Beijing PKX",
+          "Beijing"
+        ]
+      },
+      "SHA": {
+        "ja": [
+          "上海",
+          "上海圏"
+        ],
+        "en": [
+          "Shanghai",
+          "Shanghai Area"
+        ]
+      },
+      "PVG": {
+        "ja": [
+          "浦東",
+          "上海浦東"
+        ],
+        "en": [
+          "Pudong",
+          "Shanghai Pudong",
+          "Shanghai"
+        ]
+      },
+      "TPE": {
+        "ja": [
+          "台北",
+          "台湾桃園",
+          "台北（桃園）"
+        ],
+        "en": [
+          "Taipei",
+          "Taoyuan",
+          "Taipei Taoyuan"
+        ]
+      },
+      "TSA": {
+        "ja": [
+          "台北松山",
+          "台北（松山）"
+        ],
+        "en": [
+          "Taipei Songshan",
+          "Songshan",
+          "Taipei"
+        ]
+      },
+      "HKG": {
+        "ja": [
+          "香港",
+          "香港国際空港"
+        ],
+        "en": [
+          "Hong Kong",
+          "Hong Kong International Airport"
+        ]
+      },
+      "SIN": {
+        "ja": [
+          "シンガポール",
+          "チャンギ"
+        ],
+        "en": [
+          "Singapore",
+          "Changi",
+          "Singapore Changi"
+        ]
+      },
+      "BKK": {
+        "ja": [
+          "バンコク",
+          "スワンナプーム"
+        ],
+        "en": [
+          "Bangkok",
+          "Suvarnabhumi",
+          "Bangkok BKK"
+        ]
+      },
+      "DMK": {
+        "ja": [
+          "バンコク（ドンムアン）",
+          "ドンムアン"
+        ],
+        "en": [
+          "Bangkok Don Mueang",
+          "Don Mueang",
+          "Bangkok"
+        ]
+      },
+      "KUL": {
+        "ja": [
+          "クアラルンプール",
+          "KLIA"
+        ],
+        "en": [
+          "Kuala Lumpur",
+          "KLIA",
+          "Kuala Lumpur International Airport"
+        ]
+      },
+      "NYC": {
+        "ja": [
+          "ニューヨーク",
+          "ニューヨーク圏"
+        ],
+        "en": [
+          "New York",
+          "New York City"
+        ]
+      },
+      "JFK": {
+        "ja": [
+          "ジョン・F・ケネディ",
+          "ニューヨーク（JFK）"
+        ],
+        "en": [
+          "JFK",
+          "John F Kennedy",
+          "New York JFK",
+          "New York"
+        ]
+      },
+      "LGA": {
+        "ja": [
+          "ラガーディア",
+          "ニューヨーク（LGA）"
+        ],
+        "en": [
+          "LaGuardia",
+          "New York LGA",
+          "New York"
+        ]
+      },
+      "EWR": {
+        "ja": [
+          "ニューアーク",
+          "ニューヨーク（EWR）"
+        ],
+        "en": [
+          "Newark",
+          "Newark Liberty",
+          "New York Newark",
+          "New York"
+        ]
+      },
+      "LON": {
+        "ja": [
+          "ロンドン",
+          "ロンドン圏"
+        ],
+        "en": [
+          "London",
+          "London Area"
+        ]
+      },
+      "LHR": {
+        "ja": [
+          "ヒースロー",
+          "ロンドン（ヒースロー）"
+        ],
+        "en": [
+          "Heathrow",
+          "London Heathrow",
+          "London"
+        ]
+      },
+      "LGW": {
+        "ja": [
+          "ガトウィック",
+          "ロンドン（ガトウィック）"
+        ],
+        "en": [
+          "Gatwick",
+          "London Gatwick",
+          "London"
+        ]
+      },
+      "LCY": {
+        "ja": [
+          "ロンドンシティ",
+          "ロンドン（シティ）"
+        ],
+        "en": [
+          "London City",
+          "London LCY",
+          "London"
+        ]
+      },
+      "LTN": {
+        "ja": [
+          "ルートン",
+          "ロンドン（ルートン）"
+        ],
+        "en": [
+          "Luton",
+          "London Luton",
+          "London"
+        ]
+      },
+      "STN": {
+        "ja": [
+          "スタンステッド",
+          "ロンドン（スタンステッド）"
+        ],
+        "en": [
+          "Stansted",
+          "London Stansted",
+          "London"
+        ]
+      },
+      "SEN": {
+        "ja": [
+          "サウスエンド",
+          "ロンドン（サウスエンド）"
+        ],
+        "en": [
+          "Southend",
+          "London Southend",
+          "London"
+        ]
+      },
+      "PAR": {
+        "ja": [
+          "パリ",
+          "パリ圏"
+        ],
+        "en": [
+          "Paris",
+          "Paris Area"
+        ]
+      },
+      "CDG": {
+        "ja": [
+          "シャルル・ド・ゴール",
+          "パリ（CDG）"
+        ],
+        "en": [
+          "Charles de Gaulle",
+          "Paris CDG",
+          "Paris"
+        ]
+      },
+      "ORY": {
+        "ja": [
+          "オルリー",
+          "パリ（オルリー）"
+        ],
+        "en": [
+          "Orly",
+          "Paris Orly",
+          "Paris"
+        ]
+      },
+      "ROM": {
+        "ja": [
+          "ローマ",
+          "ローマ圏"
+        ],
+        "en": [
+          "Rome",
+          "Rome Area"
+        ]
+      },
+      "FCO": {
+        "ja": [
+          "フィウミチーノ",
+          "ローマ（フィウミチーノ）"
+        ],
+        "en": [
+          "Fiumicino",
+          "Rome Fiumicino",
+          "Rome"
+        ]
+      },
+      "CIA": {
+        "ja": [
+          "チャンピーノ",
+          "ローマ（チャンピーノ）"
+        ],
+        "en": [
+          "Ciampino",
+          "Rome Ciampino",
+          "Rome"
+        ]
+      },
+      "MIL": {
+        "ja": [
+          "ミラノ",
+          "ミラノ圏"
+        ],
+        "en": [
+          "Milan",
+          "Milan Area"
+        ]
+      },
+      "MXP": {
+        "ja": [
+          "マルペンサ",
+          "ミラノ（マルペンサ）"
+        ],
+        "en": [
+          "Malpensa",
+          "Milan Malpensa",
+          "Milan"
+        ]
+      },
+      "LIN": {
+        "ja": [
+          "リナーテ",
+          "ミラノ（リナーテ）"
+        ],
+        "en": [
+          "Linate",
+          "Milan Linate",
+          "Milan"
+        ]
+      },
+      "BGY": {
+        "ja": [
+          "ベルガモ",
+          "ミラノ（ベルガモ）"
+        ],
+        "en": [
+          "Bergamo",
+          "Milan Bergamo",
+          "Milan"
+        ]
+      },
+      "WAS": {
+        "ja": [
+          "ワシントン",
+          "ワシントン圏"
+        ],
+        "en": [
+          "Washington",
+          "Washington DC",
+          "Washington Area"
+        ]
+      },
+      "IAD": {
+        "ja": [
+          "ダレス",
+          "ワシントン（ダレス）"
+        ],
+        "en": [
+          "Dulles",
+          "Washington Dulles",
+          "Washington"
+        ]
+      },
+      "DCA": {
+        "ja": [
+          "レーガン",
+          "ワシントン（レーガン）"
+        ],
+        "en": [
+          "Reagan",
+          "Ronald Reagan",
+          "Washington National",
+          "Washington"
+        ]
+      },
+      "BWI": {
+        "ja": [
+          "ボルティモア",
+          "ボルティモア・ワシントン"
+        ],
+        "en": [
+          "Baltimore",
+          "Baltimore Washington",
+          "Washington"
+        ]
+      },
+      "SFO": {
+        "ja": [
+          "サンフランシスコ",
+          "サンフランシスコ国際空港"
+        ],
+        "en": [
+          "San Francisco",
+          "San Francisco International Airport"
+        ]
+      },
+      "LAX": {
+        "ja": [
+          "ロサンゼルス",
+          "ロサンゼルス国際空港"
+        ],
+        "en": [
+          "Los Angeles",
+          "Los Angeles International Airport"
+        ]
+      },
+      "SEA": {
+        "ja": [
+          "シアトル",
+          "シアトル・タコマ"
+        ],
+        "en": [
+          "Seattle",
+          "Seattle Tacoma"
+        ]
+      },
+      "YVR": {
+        "ja": [
+          "バンクーバー",
+          "バンクーバー国際空港"
+        ],
+        "en": [
+          "Vancouver",
+          "Vancouver International Airport"
+        ]
+      },
+      "SYD": {
+        "ja": [
+          "シドニー",
+          "シドニー国際空港"
+        ],
+        "en": [
+          "Sydney",
+          "Sydney Kingsford Smith"
+        ]
+      },
+      "MEL": {
+        "ja": [
+          "メルボルン",
+          "メルボルン国際空港"
+        ],
+        "en": [
+          "Melbourne",
+          "Melbourne Airport"
+        ]
+      },
+      "DXB": {
+        "ja": [
+          "ドバイ",
+          "ドバイ国際空港"
+        ],
+        "en": [
+          "Dubai",
+          "Dubai International Airport"
+        ]
+      },
+      "DOH": {
+        "ja": [
+          "ドーハ",
+          "ハマド"
+        ],
+        "en": [
+          "Doha",
+          "Hamad",
+          "Hamad International Airport"
+        ]
+      },
+      "IST": {
+        "ja": [
+          "イスタンブール",
+          "イスタンブール空港"
+        ],
+        "en": [
+          "Istanbul",
+          "Istanbul Airport"
+        ]
+      },
+      "FRA": {
+        "ja": [
+          "フランクフルト",
+          "フランクフルト国際空港"
+        ],
+        "en": [
+          "Frankfurt",
+          "Frankfurt Airport"
+        ]
+      },
+      "AMS": {
+        "ja": [
+          "アムステルダム",
+          "スキポール"
+        ],
+        "en": [
+          "Amsterdam",
+          "Schiphol",
+          "Amsterdam Schiphol"
+        ]
+      },
+      "MAD": {
+        "ja": [
+          "マドリード",
+          "バラハス"
+        ],
+        "en": [
+          "Madrid",
+          "Barajas",
+          "Madrid Barajas"
+        ]
+      },
+      "BCN": {
+        "ja": [
+          "バルセロナ",
+          "エル・プラット"
+        ],
+        "en": [
+          "Barcelona",
+          "El Prat",
+          "Barcelona El Prat"
+        ]
+      },
+      "MUC": {
+        "ja": [
+          "ミュンヘン",
+          "ミュンヘン空港"
+        ],
+        "en": [
+          "Munich",
+          "Munich Airport"
+        ]
+      },
+      "ZRH": {
+        "ja": [
+          "チューリッヒ",
+          "チューリッヒ空港"
+        ],
+        "en": [
+          "Zurich",
+          "Zurich Airport"
+        ]
+      },
+      "VIE": {
+        "ja": [
+          "ウィーン",
+          "ウィーン国際空港"
+        ],
+        "en": [
+          "Vienna",
+          "Vienna International Airport"
+        ]
+      }
+    }
+  }
+}

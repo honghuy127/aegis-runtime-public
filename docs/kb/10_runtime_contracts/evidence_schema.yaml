@@ -1,0 +1,39 @@
+version: '1.0'
+last_updated: '2026-02-26'
+step_result_schema:
+  ok:
+    type: bool
+    required: true
+    description: Success/failure flag
+  reason:
+    type: str
+    required: true
+    description: Machine-readable reason code
+  evidence:
+    type: Dict[str, Any]
+    required: true
+    description: Diagnostic context
+  selector_used:
+    type: str
+    required: false
+    description: Last selector attempted
+  action_budget_used:
+    type: int
+    required: true
+    description: Actions consumed
+extraction_result_schema:
+  required_fields:
+  - price
+  - currency
+  - confidence
+  - source
+  - reason
+  optional_fields:
+  - scope
+  - route_bound
+  - scenario_ready
+  - scope_class
+  - status
+  - strategy
+  - normalized
+  - raw_output

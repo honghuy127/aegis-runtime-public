@@ -1,0 +1,824 @@
+# Evidence Fields Catalog
+# Machine-readable reference for StepResult.evidence fields
+# See: evidence.md for usage guide
+
+version: "1.0"
+last_updated: "2026-02-26"
+
+# Core StepResult structure
+step_result_schema:
+  ok:
+    type: bool
+    required: true
+    description: "Success/failure flag"
+  reason:
+    type: str
+    required: true
+    description: "Machine-readable reason code"
+  evidence:
+    type: Dict[str, Any]
+    required: true
+    description: "Diagnostic context"
+  selector_used:
+    type: str
+    required: false
+    description: "Last selector attempted"
+  action_budget_used:
+    type: int
+    required: true
+    description: "Actions consumed"
+
+# Evidence field namespaces
+namespaces:
+  calendar:
+    description: "Date picker calendar state"
+    fields:
+      - key: "calendar.failure_stage"
+        type: string
+        required: false
+        values: ["open", "month_header", "month_nav", "day_click", "verify"]
+        producers: ["core/scenario/google_flights.py:gf_set_date"]
+        consumers: ["utils/triage.py", "KB cards"]
+        description: "Where in date picker process failure occurred"
+
+      - key: "calendar.parsing_method"
+        type: string
+        required: false
+        values: ["parse_month_year_utility", "gridcell_aria_label", "none"]
+        producers: ["core/scenario/google_flights.py"]
+        description: "Which month-year parsing strategy was used"
+
+      - key: "calendar.current_month"
+        type: string
+        required: false
+        format: "YYYY-MM"
+        description: "Current displayed month in calendar"
+
+      - key: "calendar.target_month"
+        type: string
+        required: false
+        format: "YYYY-MM"
+        description: "Target month we're trying to reach"
+
+      - key: "calendar.nav_steps"
+        type: int
+        required: false
+        description: "Month navigation steps taken"
+
+      - key: "calendar.day"
+        type: int
+        required: false
+        description: "Target day number"
+
+      - key: "calendar.typed_fallback_used"
+        type: bool
+        required: false
+        description: "Whether direct typing fallback was used"
+
+      - key: "calendar.typed_fallback_reason"
+        type: string
+        required: false
+        description: "Reason for typed fallback usage"
+
+      - key: "calendar.typed_fallback_raw_reason"
+        type: string
+        required: false
+        description: "Raw fallback reason (un-normalized)"
+
+      - key: "calendar.nav_next_selectors_tried"
+        type: array
+        required: false
+        max_length: 5
+        description: "Selectors attempted for next-month navigation"
+
+      - key: "calendar.nav_prev_selectors_tried"
+        type: array
+        required: false
+        max_length: 5
+        description: "Selectors attempted for previous-month navigation"
+
+      - key: "calendar.return_chip_attempted"
+        type: bool
+        required: false
+        description: "Whether return chip activation was attempted"
+
+      - key: "calendar.return_chip_timeout_ms"
+        type: int
+        required: false
+        description: "Timeout used for return chip activation"
+
+      - key: "calendar.return_chip_activated"
+        type: bool
+        required: false
+        description: "Whether return chip activation succeeded"
+
+      - key: "calendar.return_chip_selector"
+        type: string
+        required: false
+        description: "Selector used for return chip activation"
+
+      - key: "calendar.return_chip_ready_after"
+        type: int
+        required: false
+        description: "Milliseconds to reach ready state after activation"
+
+      - key: "calendar.return_chip_ready_reason"
+        type: string
+        required: false
+        description: "Reason for readiness decision"
+
+      - key: "calendar.return_chip_error"
+        type: string
+        required: false
+        description: "Error when return chip activation failed"
+
+      - key: "calendar.snapshot_path"
+        type: string
+        required: false
+        description: "Path to calendar state snapshot (JSON) for deterministic analysis"
+
+  ui:
+    description: "UI/selector interactions"
+    fields:
+      - key: "ui.selector_attempts"
+        type: int
+        required: false
+        description: "Number of selectors tried"
+
+      - key: "ui.opener_visible"
+        type: bool
+        required: false
+        description: "Whether opener was visible"
+
+      - key: "ui.opener_enabled"
+        type: bool
+        required: false
+        description: "Whether opener was enabled"
+
+      - key: "ui.overlay_detected"
+        type: bool
+        required: false
+        description: "Whether modal/overlay blocked interaction"
+
+      - key: "ui.token_hits"
+        type: int
+        required: false
+        description: "Number of interstitial tokens detected"
+
+  verify:
+    description: "Form verification, value checks"
+    fields:
+      - key: "verify.verified_value"
+        type: string
+        required: false
+        description: "Actual field value after operation"
+
+      - key: "verify.expected_date"
+        type: string
+        required: false
+        format: "YYYY-MM-DD"
+        description: "Expected date value"
+
+      - key: "verify.expected_iata"
+        type: string
+        required: false
+        description: "Expected IATA code"
+
+      - key: "verify.expected_text"
+        type: string
+        required: false
+        description: "Expected free-text value"
+
+      - key: "verify.active_matches_expected"
+        type: bool
+        required: false
+        description: "Whether active input value matches expected"
+
+      - key: "verify.active_value"
+        type: string
+        required: false
+        description: "Active input value at verification"
+
+      - key: "verify.active_aria_label"
+        type: string
+        required: false
+        description: "Active input aria-label at verification"
+
+      - key: "verify.active_placeholder"
+        type: string
+        required: false
+        description: "Active input placeholder at verification"
+
+      - key: "verify.active_role_match"
+        type: bool
+        required: false
+        description: "Whether active role matched expected field"
+
+      - key: "verify.method"
+        type: string
+        required: false
+        values: ["field_read", "field_read_fallback_semantic", "active_input", "active_input_semantic", "selector_semantic"]
+        description: "Verification method used"
+
+  time:
+    description: "Timing, deadlines, elapsed time"
+    fields:
+      - key: "time.elapsed_ms"
+        type: int
+        required: false
+        description: "Time spent (milliseconds)"
+
+      - key: "time.deadline_ms"
+        type: int
+        required: false
+        description: "Configured deadline (milliseconds)"
+
+      - key: "time.remaining_ms"
+        type: int
+        required: false
+        description: "Remaining budget at failure point"
+
+  budget:
+    description: "Action budget consumption"
+    fields:
+      - key: "budget.action_count"
+        type: int
+        required: false
+        description: "Total actions attempted"
+
+      - key: "budget.max"
+        type: int
+        required: false
+        description: "Budget limit"
+
+      - key: "budget.stage"
+        type: string
+        required: false
+        values: ["open", "month_nav", "day_click", "verify"]
+        description: "Stage where budget was exhausted"
+
+  suggest:
+    description: "Suggestion/combobox state"
+    fields:
+      - key: "suggest.commit_strategy"
+        type: string
+        required: false
+        values: ["suggestion_click", "enter_key", "keyboard_fallback"]
+        description: "How commit was attempted"
+
+      - key: "suggest.suggestion_rank"
+        type: int
+        required: false
+        values: [0, 1, 2, 3]
+        description: "IATA ranking score (0=no match, 3=exact)"
+
+      - key: "suggest.suggestion_text"
+        type: string
+        required: false
+        description: "Text of clicked suggestion"
+
+      - key: "suggest.input_text"
+        type: string
+        required: false
+        description: "Text typed into combobox"
+
+      - key: "suggest.listbox_selector"
+        type: string
+        required: false
+        description: "Selector for suggestion listbox"
+
+  combobox:
+    description: "Combobox helper diagnostics"
+    fields:
+      - key: "combobox.failure_stage"
+        type: string
+        required: false
+        description: "Combobox failure stage"
+
+      - key: "combobox.failure_remaining_ms"
+        type: int
+        required: false
+        description: "Remaining time at failure"
+
+      - key: "combobox.failure_reserve_ms"
+        type: int
+        required: false
+        description: "Reserved time at failure"
+
+      - key: "combobox.activation_selector_used"
+        type: string
+        required: false
+        description: "Selector used to activate combobox"
+
+      - key: "combobox.activation_visible_prefilter"
+        type: bool
+        required: false
+        description: "Whether visible prefilter was used"
+
+      - key: "combobox.activation_open_probe"
+        type: bool
+        required: false
+        description: "Whether open probe was used"
+
+      - key: "combobox.activation_selector_index_used"
+        type: int
+        required: false
+        description: "Index of activation selector used"
+
+      - key: "combobox.input_selector_used"
+        type: string
+        required: false
+        description: "Selector used to find input field"
+
+      - key: "combobox.generic_input_selector_used"
+        type: string
+        required: false
+        description: "Generic selector used for input fallback"
+
+      - key: "combobox.prefilled_match"
+        type: bool
+        required: false
+        description: "Whether prefilled value matched expected"
+
+      - key: "combobox.prefilled_match_token"
+        type: string
+        required: false
+        description: "Token used for prefilled match"
+
+      - key: "combobox.prefilled_selector_used"
+        type: string
+        required: false
+        description: "Selector used to read prefilled value"
+
+      - key: "combobox.prefilled_value"
+        type: string
+        required: false
+        description: "Prefilled value detected"
+
+      - key: "combobox.keyboard_commit_attempted"
+        type: bool
+        required: false
+        description: "Whether keyboard commit was attempted"
+
+      - key: "combobox.option_click_succeeded"
+        type: bool
+        required: false
+        description: "Whether suggestion click succeeded"
+
+      - key: "combobox.verify_ok"
+        type: bool
+        required: false
+        description: "Whether verification succeeded"
+
+      - key: "combobox.verify_semantic_fallback"
+        type: bool
+        required: false
+        description: "Whether semantic fallback verification was used"
+
+      - key: "combobox.commit_signal"
+        type: string
+        required: false
+        description: "Commit signal observed"
+
+  dom:
+    description: "DOM structure, element attributes"
+    fields:
+      - key: "dom.selectors_tried"
+        type: array
+        required: false
+        max_length: 5
+        description: "Array of selector strings attempted"
+
+      - key: "dom.root_detected"
+        type: bool
+        required: false
+        description: "Whether calendar root element was found"
+
+  net:
+    description: "Network requests, response timing"
+    fields:
+      - key: "net.response_status"
+        type: int
+        required: false
+        description: "HTTP response status code"
+
+  input:
+    description: "Input field state, text content"
+    fields:
+      - key: "input.prefilled_value"
+        type: string
+        required: false
+        description: "Pre-filled input value detected"
+
+  scope:
+    description: "Scope and interstitial detection"
+    fields:
+      - key: "scope.scope_signal"
+        type: string
+        required: false
+        description: "Scope signal (e.g., irrelevant_page)"
+
+      - key: "scope.confidence"
+        type: string
+        required: false
+        description: "Scope confidence"
+
+      - key: "scope.source"
+        type: string
+        required: false
+        description: "Scope signal source (heuristic or vlm)"
+
+      - key: "scope.token_matches"
+        type: int
+        required: false
+        description: "Token match count"
+
+      - key: "scope.non_flight_tokens"
+        type: array
+        required: false
+        description: "Non-flight tokens detected"
+
+  vlm:
+    description: "VLM evidence payloads"
+    fields:
+      - key: "vlm.vlm_call"
+        type: string
+        required: false
+        description: "VLM call name (e.g., page_kind)"
+
+      - key: "vlm.page_kind"
+        type: string
+        required: false
+        description: "VLM page kind classification"
+
+      - key: "vlm.confidence"
+        type: string
+        required: false
+        description: "VLM confidence"
+
+      - key: "vlm.language_hint"
+        type: string
+        required: false
+        description: "Language hint"
+
+      - key: "vlm.payload_hash"
+        type: string
+        required: false
+        description: "Hash of payload content"
+
+      - key: "vlm.payload_size"
+        type: int
+        required: false
+        description: "Payload size in bytes"
+
+      - key: "vlm.schema_valid"
+        type: bool
+        required: false
+        description: "Whether payload validated against schema"
+
+      - key: "vlm.target_regions"
+        type: dict
+        required: false
+        description: "Advisory target regions for UI assistance (normalized bboxes)"
+
+  multimodal:
+    description: "Multimodal judge output"
+    fields:
+      - key: "multimodal.source"
+        type: string
+        required: false
+        description: "Multimodal extraction source"
+
+      - key: "multimodal.judge_support"
+        type: string
+        required: false
+        description: "Judge support level"
+
+      - key: "multimodal.judge_reason"
+        type: string
+        required: false
+        description: "Judge reason"
+
+      - key: "multimodal.judge_accept"
+        type: bool
+        required: false
+        description: "Judge acceptance"
+
+  search_commit:
+    description: "Search commit diagnostics"
+    fields:
+      - key: "search_commit.url_changed"
+        type: bool
+        required: false
+        description: "Whether URL changed after commit"
+
+      - key: "search_commit.fragment_changed"
+        type: bool
+        required: false
+        description: "Whether URL fragment changed"
+
+      - key: "search_commit.elapsed_ms"
+        type: int
+        required: false
+        description: "Elapsed milliseconds for search commit"
+
+      - key: "search_commit.click_elapsed_ms"
+        type: int
+        required: false
+        description: "Elapsed milliseconds for click"
+
+      - key: "search_commit.enter_elapsed_ms"
+        type: int
+        required: false
+        description: "Elapsed milliseconds for enter key"
+
+      - key: "search_commit.results_wait_timeout_ms"
+        type: int
+        required: false
+        description: "Timeout waiting for results"
+
+      - key: "search_commit.post_click_ready_timeout_ms"
+        type: int
+        required: false
+        description: "Timeout waiting for post-click ready"
+
+      - key: "search_commit.search_click_attempts"
+        type: int
+        required: false
+        description: "Number of search click attempts"
+
+      - key: "search_commit.selector_candidates_count"
+        type: int
+        required: false
+        description: "Number of selector candidates"
+
+      - key: "search_commit.clickable_candidates_count"
+        type: int
+        required: false
+        description: "Number of clickable candidates"
+
+      - key: "search_commit.results_candidates_count"
+        type: int
+        required: false
+        description: "Number of results candidates"
+
+      - key: "search_commit.route_ctx_available"
+        type: bool
+        required: false
+        description: "Whether route context was available"
+
+# Evidence patterns by reason code
+reason_evidence_map:
+  calendar_dialog_not_found:
+    required_fields:
+      - "calendar.failure_stage"
+      - "ui.selector_attempts"
+    optional_fields:
+      - "ui.opener_visible"
+      - "ui.opener_enabled"
+      - "ui.overlay_detected"
+      - "dom.selectors_tried"
+      - "calendar.parsing_method"
+      - "calendar.snapshot_path"
+    example:
+      ok: false
+      reason: "calendar_dialog_not_found"
+      evidence:
+        calendar.failure_stage: "open"
+        ui.selector_attempts: 5
+        ui.opener_visible: false
+        dom.selectors_tried: ["[role='combobox'][aria-label*='出発']", "input[aria-label*='出発日']"]
+      selector_used: "[aria-label*='Departure']"
+      action_budget_used: 5
+
+  month_nav_exhausted:
+    required_fields:
+      - "calendar.nav_steps"
+      - "calendar.target_month"
+      - "calendar.current_month"
+    optional_fields:
+      - "role"
+    example:
+      ok: false
+      reason: "month_nav_exhausted"
+      evidence:
+        calendar.nav_steps: 8
+        calendar.target_month: "2026-03"
+        calendar.current_month: "2025-07"
+        role: "depart"
+      selector_used: "[aria-label*='Next month']"
+      action_budget_used: 13
+
+  calendar_day_not_found:
+    required_fields:
+      - "calendar.day"
+      - "calendar.current_month"
+    optional_fields:
+      - "dom.selectors_tried"
+    example:
+      ok: false
+      reason: "calendar_day_not_found"
+      evidence:
+        calendar.day: 1
+        calendar.current_month: "2026-03"
+        dom.selectors_tried: ["[role='gridcell'][aria-label*='1']", "button:has-text('1')"]
+      selector_used: "button:has-text('1')"
+      action_budget_used: 10
+
+  date_picker_unverified:
+    required_fields:
+      - "verify.verified_value"
+      - "verify.expected_date"
+    optional_fields:
+      - "role"
+    example:
+      ok: false
+      reason: "date_picker_unverified"
+      evidence:
+        verify.verified_value: "2026/2/1"
+        verify.expected_date: "2026-03-01"
+        role: "depart"
+      selector_used: "[aria-label*='出発日']"
+      action_budget_used: 15
+
+  budget_hit:
+    required_fields:
+      - "budget.stage"
+      - "budget.action_count"
+      - "budget.max"
+    optional_fields:
+      - "role"
+    example:
+      ok: false
+      reason: "budget_hit"
+      evidence:
+        budget.stage: "month_nav"
+        budget.action_count: 20
+        budget.max: 20
+        role: "depart"
+      selector_used: "[aria-label*='Next month']"
+      action_budget_used: 20
+
+  deadline_hit:
+    required_fields:
+      - "time.elapsed_ms"
+      - "time.deadline_ms"
+    optional_fields:
+      - "role"
+    example:
+      ok: false
+      reason: "deadline_hit"
+      evidence:
+        time.elapsed_ms: 46200
+        time.deadline_ms: 45000
+        role: "depart"
+      selector_used: "[aria-label*='出発日']"
+      action_budget_used: 12
+
+  iata_mismatch:
+    required_fields:
+      - "verify.verified_value"
+      - "suggest.commit_strategy"
+    optional_fields:
+      - "verify.expected_iata"
+      - "verify.expected_text"
+    example:
+      ok: false
+      reason: "iata_mismatch"
+      evidence:
+        verify.verified_value: "Tokyo Prefecture"
+        verify.expected_iata: "NRT"
+        suggest.commit_strategy: "enter_key"
+      selector_used: "input[aria-label*='From']"
+      action_budget_used: 6
+
+  suggestion_not_found:
+    required_fields:
+      - "suggest.input_text"
+      - "role"
+    optional_fields:
+      - "suggest.listbox_selector"
+    example:
+      ok: false
+      reason: "suggestion_not_found"
+      evidence:
+        suggest.input_text: "Tokyo"
+        role: "origin"
+        suggest.listbox_selector: "[role='listbox']"
+      selector_used: "input[aria-label*='From']"
+      action_budget_used: 4
+
+  combobox_fill_failed:
+    required_fields:
+      - "combobox.failure_stage"
+    optional_fields:
+      - "combobox.failure_remaining_ms"
+      - "combobox.failure_reserve_ms"
+      - "combobox.activation_selector_used"
+    example:
+      ok: false
+      reason: "combobox_fill_failed"
+      evidence:
+        combobox.failure_stage: "deadline_activation_budget"
+        combobox.failure_remaining_ms: 491
+        combobox.failure_reserve_ms: 360
+        combobox.activation_selector_used: "[role='combobox'][aria-label*='出発地']"
+      selector_used: ""
+      action_budget_used: 0
+
+# Success patterns
+success_evidence_map:
+  date_picker_success:
+    typical_fields:
+      - "calendar.nav_steps"
+      - "verify.verified_value"
+      - "close_method"
+      - "day_selector"
+    example:
+      ok: true
+      reason: "success"
+      evidence:
+        calendar.nav_steps: 2
+        verify.verified_value: "2026/3/1"
+        close_method: "done_button"
+        day_selector: "[aria-label*='2026年3月1日']"
+      selector_used: "[aria-label*='出発日']"
+      action_budget_used: 7
+
+  combobox_commit_success:
+    typical_fields:
+      - "suggest.commit_strategy"
+      - "suggest.suggestion_rank"
+      - "verify.verified_value"
+      - "suggest.suggestion_text"
+    example:
+      ok: true
+      reason: "commit_success"
+      evidence:
+        suggest.commit_strategy: "suggestion_click"
+        suggest.suggestion_rank: 3
+        verify.verified_value: "NRT"
+        suggest.suggestion_text: "Tokyo (NRT)"
+      selector_used: "input[aria-label*='From']"
+      action_budget_used: 5
+
+# Extraction result schema (non-StepResult)
+extraction_result_schema:
+  required_fields:
+    - "price"
+    - "currency"
+    - "confidence"
+    - "source"
+    - "reason"
+  optional_fields:
+    - "scope"
+    - "route_bound"
+    - "scenario_ready"
+    - "scope_class"
+    - "status"
+    - "strategy"
+    - "normalized"
+    - "raw_output"
+
+# Scenario artifacts (debug and state snapshots)
+artifacts:
+  scenario_last_error:
+    filename: "storage/runs/<run_id>/scenario_last_error.json"
+    description: "Scenario-level failure snapshot for blocked interstitials"
+  route_state:
+    filename: "storage/runs/<run_id>/route_state_<service>.json"
+    description: "Route/scope bind verdict and scenario extract verdict"
+  route_fill_selector_probes:
+    filenames:
+      - "storage/runs/<run_id>/artifacts/google_route_fill_origin_pre_combobox_selector_probe.json"
+      - "storage/runs/<run_id>/artifacts/google_route_fill_origin_post_combobox_selector_probe.json"
+      - "storage/runs/<run_id>/artifacts/google_route_fill_origin_combobox_failed_selector_probe.json"
+    description: "Bounded route-field selector probe artifacts"
+  date_open_selector_probes:
+    filenames:
+      - "storage/runs/<run_id>/artifacts/google_date_fill_depart_pre_open_selector_probe.json"
+      - "storage/runs/<run_id>/artifacts/google_date_fill_depart_post_open_selector_probe.json"
+      - "storage/runs/<run_id>/artifacts/google_date_fill_depart_failed_selector_probe.json"
+    description: "Bounded date opener selector probe artifacts"
+  search_commit_probes:
+    filenames:
+      - "storage/runs/<run_id>/artifacts/google_search_commit_execute_plan_step_<n>_probe.json"
+      - "storage/runs/<run_id>/artifacts/google_search_commit_post_fill_turn_commit_probe.json"
+    description: "Search commit transition probes"
+
+# Evidence guidelines
+guidelines:
+  include:
+    - "Machine-readable reason codes"
+    - "Diagnostic context (stage, role, step index)"
+    - "Quantitative metrics (elapsed_ms, counts, ranks)"
+    - "Selector information (selectors tried, selector_used)"
+    - "Verification values (verified/expected)"
+  exclude:
+    - "Full HTML or screenshots"
+    - "Secrets, tokens, or PII"
+    - "Full payloads (use hashes only)"
+    - "Large artifacts (use bounded probes)"
+  naming_conventions:
+    - "Use *_count, *_ms, *_hash suffixes"
+    - "Prefer namespaced keys (calendar.*, verify.*, combobox.*)"

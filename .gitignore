@@ -1,0 +1,126 @@
+# -----------------------------
+# OS / editor noise
+# -----------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.codex/
+*.swp
+*.swo
+*~
+
+# -----------------------------
+# Python build/test caches
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# -----------------------------
+# Virtualenv / local tooling
+# -----------------------------
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.mamba/
+conda-meta/
+.python-version
+pip-wheel-metadata/
+
+# -----------------------------
+# Secrets and local credentials
+# -----------------------------
+.env
+.env.*
+*.env
+*.local
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.credentials
+credentials*
+id_rsa
+id_ed25519
+
+# Optional local-only config overlays
+configs/*.local.yaml
+configs/*private*.yaml
+configs/*secret*.yaml
+
+# -----------------------------
+# Runtime artifacts (do not publish)
+# -----------------------------
+storage/*.db
+storage/*.sqlite
+storage/*.sqlite3
+storage/*.log
+storage/debug_*
+storage/debug/
+!storage/debug_html/
+!storage/debug_html/.gitkeep
+storage/*.png
+storage/*.html
+storage/cron.log
+storage/quick_test_last.html
+storage/last_*.html
+storage/scenario_last_error.json
+storage/scenario_debug*.json
+storage/*debug*.json
+storage/knowledge_store.json
+storage/shared_knowledge_store.json
+storage/adaptive_policy.json
+storage/plan_store.local.json
+storage/debug_html/*
+!storage/debug_html/.gitkeep
+storage/runs/
+storage/state/
+storage/browser_state/
+storage/latest_run_id.txt
+storage/_reset_backups/
+storage/refactor_baseline/
+
+# Keep source modules under storage/
+!storage/__init__.py
+!storage/*.py
+
+# -----------------------------
+# Notebook checkpoints / exports
+# -----------------------------
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# -----------------------------
+# Playwright local browser/cache
+# -----------------------------
+ms-playwright/
+.playwright/
+playwright/.cache/
+
+# =====================================
+# Runtime Debug Snapshots (QW-2)
+# =====================================
+# Browser debug HTML/PNG captures from scenario runs
+storage/debug_html/*.html
+storage/debug_html/*.png
+storage/debug_html/*.json
+!storage/debug_html/.gitkeep
+
+# State snapshots from local test runs
+storage/debug/*_state.json
+!storage/debug/.gitkeep

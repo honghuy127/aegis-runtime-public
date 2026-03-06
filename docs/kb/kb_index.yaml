@@ -1,0 +1,418 @@
+# Knowledge Base Index
+
+# This file provides a machine-readable index of authoritative documentation topics.
+# Agents should use this to discover relevant docs based on task context.
+
+version: "1.0"
+last_updated: "2026-02-26"
+
+# Navigation Guide
+#
+# For AI agents:
+#   1. Read INDEX.md for reading order
+#   2. Query entrypoints for core docs
+#   3. Use symptom_index for troubleshooting
+#   4. Search tags for semantic discovery
+#
+# For developers:
+#   1. Start with kb/INDEX.md or docs/README.md
+#   2. Read doctrine → architecture → runtime_contracts
+#   3. Use symptom_index to debug issues
+
+# YAML Catalog Access Guide
+#
+# YAML catalogs in this KB are authoritative data sources but must be
+# accessed SELECTIVELY through utils/kb_yaml_retriever.py, not by loading
+# entire files into agent context.
+#
+# DO NOT:   yaml.safe_load(open('evidence_fields.yaml'))  [bloats context]
+# DO USE:   from utils import kb_yaml_retriever
+#           kb_yaml_retriever.get_evidence_field('calendar.opened')  [bounded]
+#
+# Guarded catalogs (selective loading enforced):
+#
+# Evidence System:
+#   - kb/10_runtime_contracts/evidence_fields.yaml (659 lines)
+#     Use: get_evidence_field(), get_reason_evidence_mapping()
+#     Primary registry for evidence field definitions
+#
+#   - kb/10_runtime_contracts/evidence_catalog.yaml (824 lines)
+#     Comprehensive evidence catalog (includes examples, validation)
+#
+#   - kb/10_runtime_contracts/evidence_schema.yaml (39 lines)
+#     Schema definition for evidence structure
+#
+#   - kb/10_runtime_contracts/evidence_artifacts.yaml (41 lines)
+#     Artifact type specifications
+#
+# Triage & Diagnosis:
+#   - kb/20_decision_system/triage_decision_table.yaml (335 lines)
+#     Use: get_triage_decision(), list_triage_reasons()
+#     Reason code → evidence → first fix mappings
+#
+#   - kb/20_decision_system/runtime_symptom_map.yaml (217 lines)
+#     Use: get_symptom_diagnosis(), list_symptoms()
+#     Symptom → diagnosis → KB refs
+#
+# Architecture Invariants:
+#   - kb/00_foundation/invariants_registry.yaml (492 lines)
+#     Use: get_invariant(), list_invariants()
+#     Primary invariants registry with test linkage
+#
+#   - kb/00_foundation/architecture_invariants.yaml (593 lines)
+#     Extended invariants with detailed specifications
+#
+#   - kb/00_foundation/invariants_by_category.yaml (85 lines)
+#     Category-based invariant index
+#
+# See docs/kb/50_governance/kb_structured_retrieval.md for complete API reference.
+
+# Entrypoints: Core documentation every agent should be aware of
+entrypoints:
+  - topic: index
+    description: "Agent-focused reading order and navigation guide"
+    files:
+      - path: kb/INDEX.md
+        priority: 1
+        tags: [reading-order, navigation, onboarding]
+
+  - topic: doctrine
+    description: "Core design principles and invariants"
+    files:
+      - path: kb/00_foundation/doctrine.md
+        priority: 1
+        tags: [principles, agentic, bounded-retry, actionbudget, stepresult]
+
+  - topic: architecture
+    description: "System components, data flow, extension points"
+    files:
+      - path: kb/00_foundation/architecture.md
+        priority: 1
+        tags: [architecture, components, flow, plugins]
+
+  - topic: runtime_contracts
+    description: "Master reference for StepResult, ActionBudget, timeouts, recovery gating"
+    files:
+      - path: kb/10_runtime_contracts/runtime_contracts.md
+        priority: 1
+        tags: [contracts, stepresult, actionbudget, timeout, recovery-gating]
+
+  - topic: runtime_playbook
+    description: "Troubleshooting by symptoms/log reasons/evidence"
+    files:
+      - path: kb/20_decision_system/runtime_playbook.md
+        priority: 1
+        tags: [troubleshooting, debugging, logs, symptoms]
+      - path: kb/20_decision_system/runtime_symptom_map.yaml
+        priority: 1
+        tags: [troubleshooting, debugging, logs, symptoms, machine-readable]
+
+  - topic: triage_runbook
+    description: "Deterministic triage workflow by reason code and evidence analysis"
+    files:
+      - path: kb/20_decision_system/triage_runbook.md
+        priority: 1
+        tags: [triage, debugging, reason-codes, evidence, workflow]
+      - path: kb/20_decision_system/triage_decision_table.yaml
+        priority: 1
+        tags: [triage, debugging, reason-codes, evidence, workflow, machine-readable]
+
+  - topic: architecture_invariants
+    description: "Test-grounded architectural contracts and constraints"
+    files:
+      - path: kb/00_foundation/architecture_invariants.md
+        priority: 1
+        tags: [invariants, contracts, testing, refactoring]
+
+# Topics: Organized by functional area
+topics:
+  # Patterns
+  - name: date_picker
+    description: "Google Flights date picker with ActionBudget guards"
+    files:
+      - path: kb/30_patterns/date_picker.md
+        priority: 1
+        when_to_read: "debugging date fill failures, understanding bounded retry for dates"
+        tags: [date-picker, gf_set_date, actionbudget, explicit-failure-modes]
+
+  - name: combobox_commit
+    description: "Combobox (origin/dest) commit with IATA ranking"
+    files:
+      - path: kb/30_patterns/combobox_commit.md
+        priority: 1
+        when_to_read: "debugging location fill, understanding IATA doctrine"
+        tags: [combobox, iata, ranking, deterministic-commit]
+
+  - name: selectors
+    description: "Selector strategies, priority hierarchy, anti-patterns"
+    files:
+      - path: kb/30_patterns/selectors.md
+        priority: 1
+        when_to_read: "adding new selectors, reducing selector spam"
+        tags: [selectors, aria, role, timeout-strategy, bounded-sets]
+
+  - name: i18n_ja
+    description: "Japanese locale handling, token management, VLM hints"
+    files:
+      - path: kb/30_patterns/i18n_ja.md
+        priority: 1
+        when_to_read: "debugging JP locale, understanding tactical locale strategy"
+        tags: [i18n, japanese, locale, tokens, vlm-hints]
+
+  # Contracts
+  - name: budgets_timeouts
+    description: "ActionBudget tracking, timeout strategies, deadline enforcement"
+    files:
+      - path: kb/10_runtime_contracts/budgets_timeouts.md
+        priority: 1
+        when_to_read: "implementing bounded operations, debugging timeouts"
+        tags: [actionbudget, timeout, deadline, systematic-timeout, clamp-formula]
+
+  - name: evidence
+    description: "Evidence fields in StepResult and extraction logs"
+    files:
+      - path: kb/10_runtime_contracts/evidence.md
+        priority: 1
+        when_to_read: "diagnosing failures, understanding diagnostic context"
+        tags: [evidence, stepresult, diagnostics, failure-modes]
+      - path: kb/10_runtime_contracts/evidence_fields.yaml
+        priority: 1
+        when_to_read: "machine-readable evidence schema and examples"
+        tags: [evidence, stepresult, diagnostics, machine-readable]
+
+  - name: scenario_runner
+    description: "Scenario runner API, recovery loops, hard-gates"
+    files:
+      - path: kb/10_runtime_contracts/scenario_runner.md
+        priority: 1
+        when_to_read: "integrating with scenario_runner, understanding recovery logic"
+        tags: [scenario-runner, recovery, hard-gates, html-guarantees]
+
+  - name: browser
+    description: "Browser contract, Playwright API, session management"
+    files:
+      - path: kb/10_runtime_contracts/browser_contract.md
+        priority: 1
+        when_to_read: "implementing browser actions, debugging browser failures"
+        tags: [browser, playwright, session, timeout-contract]
+
+  - name: plugins
+    description: "Plugin extraction contract, strategy interface, fallback"
+    files:
+      - path: kb/10_runtime_contracts/plugins.md
+        priority: 1
+        when_to_read: "implementing extraction plugins, understanding acceptance gates"
+        tags: [plugins, extraction, strategy, fallback, scope-guard]
+
+  # Triage & Debugging
+  - name: triage_runbook
+    description: "Deterministic diagnosis by reason code and evidence fields"
+    files:
+      - path: kb/20_decision_system/triage_runbook.md
+        priority: 1
+        when_to_read: "diagnosing failures by StepResult.reason, following evidence trails"
+        tags: [triage, reason-codes, evidence, workflow, debugging]
+
+  # Failure Reasons Reference
+  - name: failure_reasons
+    description: "Canonical registry of failure reason codes and metadata"
+    files:
+      - path: core/scenario/reasons.py
+        priority: 1
+        when_to_read: "understanding all possible failure modes and their context"
+        tags: [failure-reasons, stepresult, reason-codes, evidence-fields]
+
+  # Architecture Decision Records
+  - name: adr
+    description: "Architecture decision records"
+    files:
+      - path: kb/50_governance/adr/0001-soft-validators-tolerant-parsing.md
+        priority: 2
+        tags: [adr, validation, parsing]
+      - path: kb/50_governance/adr/0002-incremental-plugin-migration.md
+        priority: 2
+        tags: [adr, plugins, migration]
+
+# Configuration guidance
+configuration:
+  - name: config_guide
+    description: "Configuration file reference (run, services, models, thresholds, alerts)"
+    files:
+      - path: CONFIG.md
+        priority: 1
+        when_to_read: "changing runtime behavior, tuning thresholds"
+        tags: [config, yaml, thresholds, feature-flags]
+
+  - name: development
+    description: "Development setup, testing, contribution guidelines"
+    files:
+      - path: DEVELOPMENT.md
+        priority: 2
+        when_to_read: "setting up dev environment, running tests"
+        tags: [development, setup, testing]
+
+# Quick lookup by symptom (for runtime agents)
+symptom_index:
+  - symptom: "no_html_returned"
+    doc: kb/20_decision_system/runtime_symptom_map.yaml
+    section: "symptoms.no_html_returned"
+
+  - symptom: "date_picker_failed"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.date_picker_failed
+      - kb/30_patterns/date_picker.md
+
+  - symptom: "combobox_commit_failed"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.combobox_commit_failed
+      - kb/30_patterns/combobox_commit.md
+
+  - symptom: "timeout_error"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.timeout_error
+      - kb/10_runtime_contracts/budgets_timeouts.md
+
+  - symptom: "price_extraction_failed"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.extraction_failed
+      - kb/10_runtime_contracts/plugins.md
+
+  - symptom: "blocked_interstitial"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.blocked_interstitial_captcha
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+
+  - symptom: "extraction_skipped_by_scenario_guard"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.extraction_skipped_scenario_guard
+      - kb/10_runtime_contracts/runtime_contracts.md#scenario-to-extraction-guard-contract
+
+  - symptom: "scope_conflict"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.scope_conflict
+      - kb/00_foundation/doctrine.md#fail-closed-but-not-self-destructive
+
+  - symptom: "selector_spam"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.selector_spam
+      - kb/30_patterns/selectors.md
+
+  - symptom: "infinite_recovery_loop"
+    docs:
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.recovery_loop_detected
+      - kb/10_runtime_contracts/scenario_runner.md#recovery-loop-contract
+
+  # Reason codes (queryable by agents)
+  - reason_code: "calendar_not_open"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.date_picker_failures
+      - kb/30_patterns/date_picker.md
+
+  - reason_code: "month_nav_exhausted"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.date_picker_failures
+      - kb/30_patterns/date_picker.md#month-navigation
+
+  - reason_code: "calendar_day_not_found"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.date_picker_failures
+      - kb/30_patterns/date_picker.md#day-selection
+
+  - reason_code: "date_picker_unverified"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.date_picker_failures
+      - kb/30_patterns/date_picker.md#verification
+
+  - reason_code: "iata_mismatch"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.location_failures
+      - kb/30_patterns/combobox_commit.md#iata-matching
+
+  - reason_code: "no_suggestion_match"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.location_failures
+      - kb/30_patterns/combobox_commit.md#suggestions
+
+  - reason_code: "budget_hit"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+      - kb/10_runtime_contracts/budgets_timeouts.md#action-budget
+
+  - reason_code: "timeout_error"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+      - kb/10_runtime_contracts/budgets_timeouts.md#wall-clock-timeout
+
+  - reason_code: "selector_not_found"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+      - kb/30_patterns/selectors.md
+
+  - reason_code: "blocked_interstitial_captcha"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+      - kb/10_runtime_contracts/evidence.md
+
+  - reason_code: "google_route_context_unbound"
+    docs:
+      - kb/20_decision_system/triage_decision_table.yaml#reason_tree.budget_timeout_failures
+      - kb/20_decision_system/runtime_symptom_map.yaml#symptoms.extraction_skipped_scenario_guard
+      - kb/10_runtime_contracts/runtime_contracts.md#scenario-to-extraction-guard-contract
+
+# Code hotspot mapping (for DOC: comments)
+code_hotspots:
+  - file: core/scenario/google_flights.py
+    function: gf_set_date
+    doc: kb/30_patterns/date_picker.md
+    tags: [date-picker, actionbudget, stepresult]
+
+  - file: core/agent/actor/actor.py
+    function: _safe_fill_first
+    doc: kb/30_patterns/combobox_commit.md
+    tags: [combobox, iata-ranking]
+
+  - file: core/scenario_runner.py
+    function: run_agentic_scenario
+    doc: kb/10_runtime_contracts/scenario_runner.md
+    tags: [scenario-runner, recovery, html-guarantees]
+
+  - file: core/scenario_runner/run_agentic_scenario.py
+    function: run_agentic_scenario
+    doc: kb/10_runtime_contracts/scenario_runner.md
+    tags: [scenario-runner, recovery, html-guarantees, extracted-implementation]
+
+  - file: core/scenario_runner.py
+    function: apply_selector_timeout_strategy
+    doc: kb/10_runtime_contracts/budgets_timeouts.md
+    tags: [timeout-strategy, clamp-formula]
+
+  - file: core/scenario/types.py
+    class: ActionBudget
+    doc: kb/10_runtime_contracts/budgets_timeouts.md
+    tags: [actionbudget, consume, exhaustion]
+
+  - file: core/scenario/types.py
+    class: StepResult
+    doc: kb/10_runtime_contracts/evidence.md
+    tags: [stepresult, evidence, failure-modes]
+
+  - file: core/plugins/runtime_extraction.py
+    function: route_plugin_extraction
+    doc: kb/10_runtime_contracts/plugins.md
+    tags: [plugins, router, acceptance-gate]
+
+# Tag index for semantic search
+tags:
+  agentic: [doctrine, date_picker, combobox_commit, actionbudget]
+  actionbudget: [doctrine, date_picker, budgets_timeouts, evidence]
+  stepresult: [doctrine, evidence, date_picker]
+  bounded-retry: [doctrine, scenario_runner, date_picker]
+  explicit-failure-modes: [doctrine, date_picker, evidence]
+  selectors: [selectors, combobox_commit, date_picker, i18n_ja]
+  timeout: [budgets_timeouts, browser, scenario_runner]
+  recovery: [scenario_runner, doctrine, runtime_playbook]
+  plugins: [plugins, architecture, doctrine]
+  scope-guard: [plugins, doctrine, runtime_playbook]
+  troubleshooting: [runtime_playbook, evidence]
+  i18n: [i18n_ja, selectors]
+  japanese: [i18n_ja]

@@ -1,0 +1,22 @@
+{
+  "site": "skyscanner",
+  "source_path": "/Users/honghuy127/GitHub/flight-price-watcher-agent/storage/runs/20260223_095327_8e9988/artifacts/last_skyscanner_trip1_ok.html",
+  "run_id": "20260223_095327_8e9988",
+  "captured_at": "2026-02-23T01:10:42.091949+00:00",
+  "bytes_before": 7421,
+  "bytes_after": 6997,
+  "sanitizer_stats": {
+    "script_blocks_removed": 4,
+    "inline_event_handlers_removed": 0,
+    "data_uri_blobs_redacted": 0,
+    "email_redactions": 0,
+    "token_key_redactions": 0,
+    "cookie_redactions": 0,
+    "long_token_redactions": 1,
+    "long_numeric_ids_redacted": 0,
+    "tracking_query_params_removed": 0,
+    "whitespace_collapses": 19,
+    "size_budget_strategy": 0
+  },
+  "notes": ""
+}

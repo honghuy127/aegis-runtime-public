@@ -1,0 +1,85 @@
+version: '1.0'
+last_updated: '2026-02-26'
+categories:
+- id: SCENARIO
+  name: Scenario Runner & Step Execution
+  count: 5
+- id: BUDGET
+  name: Budgeting & Watchdog Caps
+  count: 5
+- id: RECOVERY
+  name: Recovery & Fallback
+  count: 5
+- id: SELECTOR
+  name: Selector Strategy
+  count: 5
+- id: I18N
+  name: Internationalization
+  count: 3
+- id: PLUGIN
+  name: Plugin Architecture
+  count: 5
+- id: EVIDENCE
+  name: Evidence & Results
+  count: 3
+- id: STORAGE
+  name: Storage Layer
+  count: 2
+- id: PROMPT
+  name: Prompt Engineering
+  count: 4
+- id: PARSE
+  name: Parsing & Validation
+  count: 3
+- id: IMAGE
+  name: Image Handling
+  count: 2
+- id: SERVICE
+  name: Service URLs
+  count: 1
+- id: ADAPTER
+  name: Site Adapter & UI Driver Ownership
+  count: 5
+- id: DOCS
+  name: Documentation
+  count: 1
+decision_tree:
+  title: 'Where to Patch: Decision Tree'
+  scenarios:
+  - condition: UI interaction bug (e.g., date picker not filling, airport selection
+      failed)
+    actions:
+    - if: using agent driver
+      patch: core/agent/plugins/<site>/
+      files:
+      - plugin.py
+      - actions.py
+      - objects.py
+    - if: using legacy driver
+      patch: core/scenario/<site>.py
+      note: only if fallback active
+    - note: 'New features: Always go to agent adapter, never add to legacy'
+  - condition: Parsing/extraction bug (e.g., price contains currency symbol, fare
+      class not extracted)
+    actions:
+    - patch: core/plugins/services/<site>.py
+      note: This is the sole extraction owner; independent of UI driver choice
+  - condition: Shared heuristics (e.g., IATA code validation, airport alias mapping)
+    actions:
+    - patch_option_1: utils/ modules
+    - patch_option_2: docs/kb/30_patterns/*
+    - patch_option_3: configs/knowledge_rules.yaml or storage/knowledge_store.py
+    - note: Document shared contracts in docs/kb/30_patterns/ (NOT in scenario module)
+  - condition: Route binding or scope logic
+    actions:
+    - patch_option_1: core/route_binding.py
+    - patch_option_2: core/plugins/services/
+    - patch_option_3: core/scope_reconciliation.py (for VLM overrides)
+    - note: NOT in site-specific drivers
+  - condition: Recovery orchestration growth / coordinator complexity
+    actions:
+    - patch_option_1: core/site_recovery_dispatch.py (cross-site orchestration policies)
+    - patch_option_2: core/scenario_recovery_collab.py (large bounded recovery flows)
+    - note: Keep core/scenario_runner.py focused on sequencing and lifecycle boundaries
+    - note: Prefer site-dispatched callbacks over adding new direct site_key == ...
+        branches through the main loop
