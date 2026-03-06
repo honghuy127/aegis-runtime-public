@@ -7,6 +7,7 @@ A governance-aware agent runtime for resilient web task execution under bounded 
 ## Featured Technical Report
 
 - [docs/research/aegis-runtime.md](docs/research/aegis-runtime.md) - **Governance-Aware Hybrid Agent Runtime with Bounded Recovery Graphs**
+- [docs/research/formal_math_modeling.md](docs/research/formal_math_modeling.md) - **Formal mathematical modeling addendum for AegisRuntime**
 
 ## What This Repository Contains
 

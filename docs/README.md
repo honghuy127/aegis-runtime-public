@@ -19,8 +19,7 @@ docs/
 │   ├── 50_governance/   # Governance + ADRs
 │   └── ...
 ├── research/            # Research artifacts and case-study analyses
-│   ├── aegis-runtime.md # Governance-aware hybrid runtime technical report
-│   └── bot_challenge/   # Bot challenge resilience analyses (example adapter)
+│   └── aegis-runtime.md # Governance-aware hybrid runtime technical report
 └── playbooks/           # Developer integration guides
 ```
 
@@ -94,6 +93,7 @@ docs/
 
 ### Research Reports (research/)
 - [research/aegis-runtime.md](research/aegis-runtime.md) - Governance-aware hybrid runtime technical systems report
+- [research/formal_math_modeling.md](research/formal_math_modeling.md) - Formal mathematical modeling addendum for AegisRuntime
 
 ---
 

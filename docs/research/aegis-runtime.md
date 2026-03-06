@@ -10,6 +10,8 @@ The core contribution is a runtime control model that transforms unconstrained r
 
 This work reframes agent reliability as a governance problem at the runtime layer, rather than a model-improvement problem.
 
+**Companion formalization**: [formal_math_modeling.md](formal_math_modeling.md) provides the mathematical model for the runtime transition system, budget vector, and termination guarantees described in this report.
+
 ---
 
 # 1. Problem Framing
