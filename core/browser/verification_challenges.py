@@ -217,12 +217,54 @@ def _classify_verification_protection_heuristic(html_text: str) -> Dict[str, str
     if not lower:
         return _normalize_verification_classification({})
 
+    # Some flight result surfaces include anti-bot library references (for example
+    # "recaptcha" strings or PX telemetry scripts) without showing an actual
+    # challenge widget. Fail-open on clear results indicators unless strong
+    # challenge markers are present.
+    looks_like_results_surface = (
+        "/transport/flights/" in lower
+        and (
+            "day-view" in lower
+            or "updatedpriceamount" in lower
+            or "search-results" in lower
+            or "itinerary" in lower
+        )
+    )
+    has_strong_challenge_marker = any(
+        token in lower
+        for token in (
+            "px-captcha",
+            "captcha-v2",
+            "are you a person or a robot",
+            "human verification challenge",
+            "press & hold",
+            "press and hold",
+            "still having problems accessing the page",
+            "cookies turned on",
+            "turn cookies on",
+            "i'm not a robot",
+            "g-recaptcha",
+            "hcaptcha",
+            "h-captcha",
+            "cf-chl",
+            "challenge-platform",
+            "turnstile",
+        )
+    )
+    if looks_like_results_surface and not has_strong_challenge_marker:
+        return _normalize_verification_classification({})
+
     scored = []
     for label, cfg in _VERIFICATION_CLASSES.items():
         if label == "no_protection":
             continue
         tokens = list(cfg.get("tokens", []) or [])
-        score = sum(1 for token in tokens if token and token in lower)
+        hits = [token for token in tokens if token and token in lower]
+        # Bare "recaptcha" mention is frequently present in scripts on normal pages.
+        # Treat it as ambiguous unless explicit checkbox-widget markers are present.
+        if label == "checkbox_captcha" and hits and set(hits).issubset({"recaptcha"}):
+            continue
+        score = len(hits)
         if score > 0:
             scored.append((score, label))
     if not scored:

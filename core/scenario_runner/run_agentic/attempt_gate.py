@@ -272,6 +272,68 @@ def _deterministic_interstitial_action(reason: str) -> str:
     return "retry_bounded_interstitial_flow"
 
 
+def _is_route_bound_skyscanner_url(url: str) -> bool:
+    u = str(url or "").strip().lower()
+    if not u:
+        return False
+    return "/transport/flights/" in u and (not is_verification_url(u)) and (not is_skyscanner_px_captcha_url(u))
+
+
+def _looks_like_skyscanner_results_snapshot(
+    *,
+    html_text: str,
+    manual_result: Dict[str, Any],
+    fallback_result: Dict[str, Any],
+) -> bool:
+    html = str(html_text or "")
+    if len(html) < 6000:
+        return False
+    html_lower = html.lower()
+    if "press & hold" in html_lower or "enable javascript and cookies" in html_lower:
+        return False
+    route_url_candidates = [
+        str((manual_result or {}).get("page_url_after", "") or ""),
+        str((manual_result or {}).get("page_url_before", "") or ""),
+        str((fallback_result or {}).get("resolved_target_url", "") or ""),
+        str((fallback_result or {}).get("route_url_after_reload", "") or ""),
+        str((fallback_result or {}).get("expected_route_url", "") or ""),
+    ]
+    route_context_present = any(_is_route_bound_skyscanner_url(candidate) for candidate in route_url_candidates)
+    if not route_context_present:
+        return False
+    strong_markers = [
+        '"pagename":"day-view"',
+        "updatedpriceamount",
+        '"ancillary":"airli"',
+        '"entityids"',
+        "/transport/flights/",
+    ]
+    marker_hits = sum(1 for marker in strong_markers if marker in html_lower)
+    return marker_hits >= 2
+
+
+def _select_skyscanner_results_snapshot_html(
+    *,
+    attempt_html_probe: str,
+    grace_probe: Dict[str, Any],
+    fallback_result: Dict[str, Any],
+    manual_result: Dict[str, Any],
+) -> str:
+    candidates = [
+        str(attempt_html_probe or ""),
+        str((grace_probe or {}).get("html", "") or ""),
+        str((fallback_result or {}).get("html", "") or ""),
+    ]
+    for html_candidate in candidates:
+        if _looks_like_skyscanner_results_snapshot(
+            html_text=html_candidate,
+            manual_result=manual_result,
+            fallback_result=fallback_result,
+        ):
+            return html_candidate
+    return ""
+
+
 def run_attempt_precheck_and_interstitial_gate(
     *,
     browser: Any,
@@ -835,6 +897,40 @@ def run_attempt_precheck_and_interstitial_gate(
         )
     elif press_hold_executed_terminal and not press_hold_success_terminal:
         terminal_reason = "blocked_interstitial_press_hold_unsuccessful"
+    snapshot_salvage_html = _select_skyscanner_results_snapshot_html(
+        attempt_html_probe=attempt_html_probe,
+        grace_probe=grace_probe if isinstance(grace_probe, dict) else {},
+        fallback_result=fallback_result if isinstance(fallback_result, dict) else {},
+        manual_result=manual_result_terminal if isinstance(manual_result_terminal, dict) else {},
+    )
+    if (
+        _normalize_site_key(site_key) == "skyscanner"
+        and terminal_reason in {
+            "blocked_interstitial_manual_target_closed",
+            "blocked_interstitial_manual_reissue_suspected_target_closed",
+        }
+        and bool(snapshot_salvage_html)
+    ):
+        logger.info(
+            "scenario.attempt.blocked_interstitial_snapshot_salvage site=%s attempt=%s/%s reason=%s action=return_snapshot_results",
+            site_key,
+            attempt + 1,
+            max_retries,
+            terminal_reason,
+        )
+        return {
+            "should_return": True,
+            "result_html": scenario_return_fn(
+                snapshot_salvage_html,
+                ready=True,
+                reason="skyscanner_results_snapshot_after_manual_target_closed",
+                scope_class="results",
+                route_bound=True,
+                route_support="strong",
+            ),
+            "last_error": last_error,
+            "attempt_html_probe": snapshot_salvage_html,
+        }
     recommended_action = _deterministic_interstitial_action(terminal_reason)
     last_error = RuntimeError(terminal_reason)
     logger.warning(

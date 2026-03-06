@@ -100,6 +100,8 @@ NON_CANONICAL_CODE_ALLOWLIST = {
     "skyscanner_interstitial_detected",
     "skyscanner_interstitial_last_resort_when_manual_disabled",
     "skyscanner_manual_recovery_requires_headed",
+    # Scenario return status for bounded snapshot salvage after manual target-close.
+    "skyscanner_results_snapshot_after_manual_target_closed",
     "skyscanner_results_hydration_incomplete",
     "strategy_exception",
     # Predicate-gate status for bounded fallback reload validation.

@@ -296,6 +296,15 @@ def detect_skyscanner_interstitial_block(html_text: str) -> dict[str, Any]:
         or "aria-label=\"from\"" in lower
         or "aria-label=\"to\"" in lower
     )
+    has_route_results_surface = (
+        "/transport/flights/" in lower
+        and (
+            "day-view" in lower
+            or "updatedpriceamount" in lower
+            or "itinerary" in lower
+            or "search-results" in lower
+        )
+    )
     px_telemetry_only_surface = (
         ("client.px-cloud.net" in lower or "js.px-cloud.net" in lower)
         and not has_explicit_challenge_tokens
@@ -335,6 +344,14 @@ def detect_skyscanner_interstitial_block(html_text: str) -> dict[str, Any]:
         and all(hit == "captcha.js" for hit in token_hits)
     ):
         return {}
+    # Route-bound results pages can still include anti-bot library strings
+    # (for example recaptcha references) without any active challenge shell.
+    if (
+        has_route_results_surface
+        and not has_explicit_challenge_tokens
+        and not strong_px_surface
+    ):
+        return {}
 
     if (is_skyscanner or strong_px_surface) and (is_hard_challenge or legacy_px_gate):
         return {
@@ -351,6 +368,7 @@ def detect_skyscanner_interstitial_block(html_text: str) -> dict[str, Any]:
                 },
                 "ui.px_telemetry_only_surface": bool(px_telemetry_only_surface),
                 "ui.search_form_surface_detected": bool(has_search_form_surface),
+                "ui.route_results_surface_detected": bool(has_route_results_surface),
             },
         }
 

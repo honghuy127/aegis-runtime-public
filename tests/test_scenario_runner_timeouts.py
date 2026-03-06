@@ -4662,6 +4662,93 @@ def test_attempt_gate_uses_last_resort_manual_reason_for_terminal_classification
     assert result["result_html"] == "blocked_interstitial_manual_target_closed"
 
 
+def test_attempt_gate_salvages_results_snapshot_after_manual_target_closed():
+    class _FakePage:
+        url = "https://www.skyscanner.com/transport/flights/nrtt/fukt/260320/260327/"
+
+        def is_closed(self):
+            return True
+
+    class _FakeBrowser:
+        allow_human_intervention = True
+
+        def __init__(self):
+            self.page = _FakePage()
+
+        def content(self):
+            return (
+                "<html><head><script src='/captcha.js'></script></head>"
+                "<body><div id='px-captcha'></div><h1>Are you a person or a robot?</h1></body></html>"
+            )
+
+    result = run_attempt_precheck_and_interstitial_gate(
+        browser=_FakeBrowser(),
+        site_key="skyscanner",
+        url="https://www.skyscanner.com/flights",
+        origin="NRT",
+        dest="FUK",
+        depart="2026-03-20",
+        return_date="2026-03-27",
+        trip_type="round_trip",
+        is_domestic=True,
+        max_transit=None,
+        attempt=0,
+        max_retries=2,
+        max_turns=2,
+        human_mimic=True,
+        plan=[],
+        last_error=None,
+        scenario_run_id="test-run",
+        wall_clock_cap_exhausted_fn=lambda: False,
+        budget_almost_exhausted_fn=lambda: False,
+        budget_remaining_sec_fn=lambda: 60.0,
+        get_threshold_fn=lambda key, default=None: (
+            45
+            if key == "skyscanner_captcha_manual_wait_sec"
+            else default
+        ),
+        detect_site_interstitial_block_fn=lambda html, site: {},  # noqa: ARG005
+        attempt_skyscanner_interstitial_grace_fn=lambda *args, **kwargs: {  # noqa: ARG005
+            "used": True,
+            "cleared": False,
+            "html": (
+                "<html><head><script>window.__INITIAL_STATE__={\"pageName\":\"day-view\","
+                "\"ancillary\":\"airli\",\"entityIds\":[\"NRT\",\"FUK\"],"
+                "\"updatedPriceAmount\":27860};</script></head>"
+                "<body><a href='/transport/flights/nrtt/fukt/260320/260327/'>route</a>"
+                + ("x" * 7000)
+                + "</body></html>"
+            ),
+            "reason": "blocked_interstitial_captcha",
+            "manual_intervention": {
+                "used": True,
+                "reason": "manual_intervention_target_closed",
+                "error": "TargetClosedError",
+                "page_url_before": "https://www.skyscanner.com/transport/flights/nrtt/fukt/260320/260327/",
+                "page_url_after": "https://www.skyscanner.com/transport/flights/nrtt/fukt/260320/260327/",
+                "automation_activity_during_manual": {"count": 0, "counts": {}},
+            },
+        },
+        attempt_skyscanner_interstitial_fallback_reload_fn=lambda *args, **kwargs: {  # noqa: ARG005
+            "used": True,
+            "attempted": True,
+            "cleared": False,
+            "reason": "fallback_reload_failed",
+            "resolved_target_url": "https://www.skyscanner.com/transport/flights/nrtt/fukt/260320/260327/",
+        },
+        write_progress_snapshot_fn=lambda **kwargs: None,
+        write_debug_snapshot_fn=lambda payload, **kwargs: None,  # noqa: ARG005
+        write_html_snapshot_fn=lambda *args, **kwargs: None,
+        write_image_snapshot_fn=lambda *args, **kwargs: None,
+        write_json_artifact_snapshot_fn=lambda *args, **kwargs: None,
+        scenario_return_fn=lambda _html, **kwargs: str(kwargs.get("reason", "")),
+        logger=sr.log,
+    )
+
+    assert result["should_return"] is True
+    assert result["result_html"] == "skyscanner_results_snapshot_after_manual_target_closed"
+
+
 def test_attempt_gate_soft_stop_uses_safe_html_when_page_content_raises():
     class _FakeBrowser:
         def content(self):

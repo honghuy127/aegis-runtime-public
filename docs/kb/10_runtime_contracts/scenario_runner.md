@@ -42,6 +42,7 @@ Skyscanner route/date contract:
   hard re-open of the same `/transport/flights/...` URL, then one bounded shadow-challenge probe/recovery when PX runtime markers persist, then optional one-shot assisted manual recovery.
 - After interstitial clearance on Skyscanner, if the active page is already route-bound (`/transport/flights/...`), run one bounded in-place readiness probe first; only perform home rebind (`/flights`) + full refill when that probe is not ready.
 - Interstitial clearance validation on Skyscanner should short-circuit on the first safe route-bound probe (`route_ready_fast_path`) when challenge selectors are not visible and runtime challenge blockers are absent.
+- If manual last-resort closes the active page while a route-bound results snapshot is already captured, attempt-gate may return via bounded snapshot salvage (`skyscanner_results_snapshot_after_manual_target_closed`) instead of terminal blocked classification.
 - Interstitial fallback reload logic must not persist static page-level client-hint/header overrides across subsequent steps; header mutations should be transport-neutral to avoid post-challenge shell loops.
 - Interstitial fallback target decoding must fail-closed to the caller route URL when challenge payload resolves to bare homepage root (`/`) so route context is not lost after clearance.
 - If execution context drifts to Skyscanner Hotels (`/hotels/...`) during a flights scenario, bounded recovery back to Flights tab/context must run before flight fill/wait actions.

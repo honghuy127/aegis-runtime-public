@@ -46,6 +46,7 @@ Success templates (see `success_evidence_map` in the YAML):
 - `date_picker_success`
 - `combobox_commit_success`
 - `route_ready_fast_path` (post-interstitial route-bound fast-clear acceptance)
+- `skyscanner_results_snapshot_after_manual_target_closed` (bounded route-results snapshot salvage when manual target closes)
 
 ---
 

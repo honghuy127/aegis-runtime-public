@@ -46,6 +46,18 @@ def test_classify_verification_challenge_detects_text_captcha():
     assert "characters" in out["solution"]
 
 
+def test_classify_verification_challenge_detects_checkbox_when_widget_markers_present():
+    html = """
+    <html><body>
+      <div class="g-recaptcha" data-sitekey="demo"></div>
+      <label>I'm not a robot</label>
+    </body></html>
+    """
+    out = classify_verification_challenge_multiclass(html_text=html, use_vision_light=False)
+    assert out["protector_label"] == "checkbox_captcha"
+    assert "checkbox" in out["solution"]
+
+
 def test_classify_verification_challenge_detects_cookie_requirement():
     html = """
     <html><body>
@@ -60,6 +72,20 @@ def test_classify_verification_challenge_detects_cookie_requirement():
 
 def test_classify_verification_challenge_defaults_to_no_protection():
     out = classify_verification_challenge_multiclass(html_text="<html><body>normal search page</body></html>", use_vision_light=False)
+    assert out["protector_label"] == "no_protection"
+    assert out["solution"] == "no verification protection detected"
+
+
+def test_classify_verification_challenge_ignores_recaptcha_token_on_route_results_surface():
+    html = """
+    <html><body>
+      <main data-testid="day-view">Results</main>
+      <script>window.__STATE__={updatedPriceAmount:27860, pageName:"day-view"}</script>
+      <a href="/transport/flights/fuk/hnd/260502/260608/">route</a>
+      <script src="https://www.google.com/recaptcha/api.js"></script>
+    </body></html>
+    """
+    out = classify_verification_challenge_multiclass(html_text=html, use_vision_light=False)
     assert out["protector_label"] == "no_protection"
     assert out["solution"] == "no verification protection detected"
 
@@ -79,3 +105,16 @@ def test_skyscanner_interstitial_uses_multiclass_classifier_evidence():
     classifier = out["evidence"]["verification.classifier"]
     assert classifier["protector_label"] == "interstitial_press_hold"
     assert "press-and-hold" in classifier["solution"]
+
+
+def test_skyscanner_interstitial_detection_ignores_results_surface_with_recaptcha_reference_only():
+    html = """
+    <html><body>
+      <main data-testid="day-view">Results</main>
+      <script>window.__STATE__={updatedPriceAmount:27860, pageName:"day-view"}</script>
+      <a href="/transport/flights/fuk/hnd/260502/260608/">route</a>
+      <script src="https://www.google.com/recaptcha/api.js"></script>
+    </body></html>
+    """
+    out = detect_skyscanner_interstitial_block(html)
+    assert out == {}
